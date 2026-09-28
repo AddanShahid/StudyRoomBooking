@@ -95,3 +95,4 @@ C:\Users\addan\OneDrive\Skrivebord\StudyRoomBooking\obj\Debug\net10.0\refint\Stu
 C:\Users\addan\OneDrive\Skrivebord\StudyRoomBooking\obj\Debug\net10.0\StudyRoomBooking.pdb
 C:\Users\addan\OneDrive\Skrivebord\StudyRoomBooking\obj\Debug\net10.0\StudyRoomBooking.genruntimeconfig.cache
 C:\Users\addan\OneDrive\Skrivebord\StudyRoomBooking\obj\Debug\net10.0\ref\StudyRoomBooking.dll
+C:\Users\addan\OneDrive\Skrivebord\StudyRoomBooking\obj\Debug\net10.0\StudyRoomBooking.sourcelink.json
