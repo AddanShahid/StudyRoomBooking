@@ -5,11 +5,7 @@
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net6.0/_._": {
-=======
-          "lib/net6.0/Humanizer.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -22,11 +18,7 @@
       "Microsoft.Build.Framework/18.0.2": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "ref/net10.0/_._": {
-=======
-          "ref/net10.0/Microsoft.Build.Framework.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -49,11 +41,7 @@
           "Microsoft.CodeAnalysis.Analyzers": "3.11.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/Microsoft.CodeAnalysis.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".pdb;.xml"
           }
         },
@@ -111,11 +99,7 @@
           "Microsoft.CodeAnalysis.Common": "[5.0.0]"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/Microsoft.CodeAnalysis.CSharp.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".pdb;.xml"
           }
         },
@@ -177,11 +161,7 @@
           "System.Composition": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".pdb;.xml"
           }
         },
@@ -241,11 +221,7 @@
           "System.Composition": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".pdb;.xml"
           }
         },
@@ -308,14 +284,7 @@
           "System.Composition": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {}
-=======
-          "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {},
-          "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll": {
-            "related": ".pdb;.xml"
-          }
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {},
@@ -438,11 +407,7 @@
           "Newtonsoft.Json": "13.0.4"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net10.0/_._": {
-=======
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Design.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -524,11 +489,7 @@
       "Microsoft.VisualStudio.SolutionPersistence/1.0.52": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net8.0/_._": {
-=======
-          "lib/net8.0/Microsoft.VisualStudio.SolutionPersistence.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -544,11 +505,7 @@
           "System.CodeDom": "6.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net6.0/_._": {}
-=======
-          "lib/net6.0/Mono.TextTemplating.dll": {}
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
         },
         "runtime": {
           "lib/net6.0/Mono.TextTemplating.dll": {}
@@ -560,11 +517,7 @@
       "Newtonsoft.Json/13.0.4": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net6.0/_._": {
-=======
-          "lib/net6.0/Newtonsoft.Json.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -713,11 +666,7 @@
       "System.CodeDom/6.0.0": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net6.0/_._": {
-=======
-          "lib/net6.0/System.CodeDom.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -752,11 +701,7 @@
       "System.Composition.AttributedModel/9.0.0": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/System.Composition.AttributedModel.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -775,11 +720,7 @@
           "System.Composition.AttributedModel": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/System.Composition.Convention.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -798,11 +739,7 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/System.Composition.Hosting.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -818,11 +755,7 @@
       "System.Composition.Runtime/9.0.0": {
         "type": "package",
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/System.Composition.Runtime.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -843,11 +776,7 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-<<<<<<< HEAD
           "lib/net9.0/_._": {
-=======
-          "lib/net9.0/System.Composition.TypedParts.dll": {
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
             "related": ".xml"
           }
         },
@@ -2459,19 +2388,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\addan\\.nuget\\packages\\": {}
+    "C:\\Users\\Burha\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
+      "projectUniqueName": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
       "projectName": "StudyRoomBooking",
-      "projectPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
-      "packagesPath": "C:\\Users\\addan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\obj\\",
+      "projectPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
+      "packagesPath": "C:\\Users\\Burha\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\addan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Burha\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2950,5 +2879,13 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0."
+    }
+  ]
 }

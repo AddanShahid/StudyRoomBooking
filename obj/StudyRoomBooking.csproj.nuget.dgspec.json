@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj": {}
+    "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj": {}
   },
   "projects": {
-    "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj": {
+    "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
+        "projectUniqueName": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
         "projectName": "StudyRoomBooking",
-        "projectPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
-        "packagesPath": "C:\\Users\\addan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\obj\\",
+        "projectPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
+        "packagesPath": "C:\\Users\\Burha\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\addan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Burha\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -47,11 +47,8 @@
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore.Design": {
-<<<<<<< HEAD
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
-=======
->>>>>>> 904fbdb45c93f17c7a01b0b5aa6c5ecba9a9a94f
               "target": "Package",
               "version": "[10.0.12, )"
             },
