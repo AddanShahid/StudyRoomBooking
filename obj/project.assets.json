@@ -2388,19 +2388,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\addan\\.nuget\\packages\\": {}
+    "C:\\Users\\Burha\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
+      "projectUniqueName": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
       "projectName": "StudyRoomBooking",
-      "projectPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
-      "packagesPath": "C:\\Users\\addan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\obj\\",
+      "projectPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
+      "packagesPath": "C:\\Users\\Burha\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\addan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Burha\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
