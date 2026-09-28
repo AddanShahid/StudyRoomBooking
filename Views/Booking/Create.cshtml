@@ -1,63 +1,70 @@
+```cshtml
 @model StudyRoomBooking.Models.Booking
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Booking";
 }
 
-<h1>Create</h1>
+<h1>Create Booking</h1>
 
-<h4>Booking</h4>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="StudentName" class="control-label"></label>
+
+            <div class="form-group mb-3">
+                <label asp-for="StudentName" class="control-label">Student Name</label>
                 <input asp-for="StudentName" class="form-control" />
                 <span asp-validation-for="StudentName" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="RoomName" class="control-label"></label>
-                <input asp-for="RoomName" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="RoomName" class="control-label">Room</label>
+                <input asp-for="RoomName" class="form-control" placeholder="e.g. Room 101" />
                 <span asp-validation-for="RoomName" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Subject" class="control-label"></label>
-                <input asp-for="Subject" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Subject" class="control-label">Subject</label>
+                <input asp-for="Subject" class="form-control" placeholder="e.g. Web Applications" />
                 <span asp-validation-for="Subject" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Topic" class="control-label"></label>
-                <input asp-for="Topic" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Topic" class="control-label">Topic (optional)</label>
+                <input asp-for="Topic" class="form-control" placeholder="What will you work on?" />
                 <span asp-validation-for="Topic" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Date" class="control-label">Date</label>
+                <input asp-for="Date" type="date" class="form-control" />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="StartTime" class="control-label">Start Time</label>
+                <input asp-for="StartTime" type="time" class="form-control" />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="EndTime" class="control-label">End Time</label>
+                <input asp-for="EndTime" type="time" class="form-control" />
                 <span asp-validation-for="EndTime" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create Booking" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to Bookings</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+```
