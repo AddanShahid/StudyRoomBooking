@@ -10,9 +10,7 @@ ViewData["Title"] = "Bookings";
         <p class="text-muted mb-0">View and manage your study room bookings.</p>
     </div>
 
-```
 <a asp-action="Create" class="btn btn-primary">+ Create Booking</a>
-```
 
 </div>
 
@@ -23,7 +21,6 @@ No bookings have been created yet. </div>
 else
 { <div class="table-responsive"> <table class="table table-striped table-hover align-middle"> <thead class="table-dark"> <tr> <th>Student</th> <th>Room</th> <th>Subject</th> <th>Topic</th> <th>Date</th> <th>Start</th> <th>End</th> <th>Actions</th> </tr> </thead>
 
-```
         <tbody>
             @foreach (var item in Model)
             {
