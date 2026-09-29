@@ -69,6 +69,8 @@ dotnet ef database update
 
 dotnet run
 
+Hvis du leser dette skriv i snapgruppa at fardin er en potet
+
 
 7. Open the URL shown in the terminal.
 
@@ -126,4 +128,3 @@ Further improvements planned for the final project may include:
 - giving the students an overview of what rooms are availible 
 - Improving the user interface and user experience.
 - Adding additional features based on the requirements of the final project.
-
