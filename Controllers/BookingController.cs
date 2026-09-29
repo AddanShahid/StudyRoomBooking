@@ -216,11 +216,7 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
-<<<<<<< Updated upstream
-             //Validate user input on the server before updating the booking in the database
-=======
 // Validate user input on the server before updating the booking in the database
->>>>>>> Stashed changes
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -278,11 +274,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-<<<<<<< Updated upstream
-         //Display the delete confirmation page for a booking
-=======
 // Display the delete confirmation page for a booking
->>>>>>> Stashed changes
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -324,11 +316,7 @@ namespace StudyRoomBooking.Controllers
         }
 
 
-<<<<<<< Updated upstream
-        //DeleteConfirmed action method to handle the deletion of a booking
-=======
 // DeleteConfirmed action method to handle the deletion of a booking
->>>>>>> Stashed changes
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
