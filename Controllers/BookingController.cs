@@ -21,7 +21,7 @@ namespace StudyRoomBooking.Controllers
         }
 
 
-        //Display all the bookings from the database
+        // Display all the bookings from the database
         public async Task<IActionResult> Index()
         {
             try
@@ -40,7 +40,7 @@ namespace StudyRoomBooking.Controllers
             catch (Exception ex)
             {
 
-                //Handle unexpected errors when reading from the database
+                // Handle unexpected errors when reading from the database
                 _logger.LogError(
                     ex,
                     "Feil ved henting av bookinger.");
@@ -50,7 +50,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-        //Display the details of a specific booking
+        // Display the details of a specific booking
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -84,7 +84,7 @@ namespace StudyRoomBooking.Controllers
             catch (Exception ex)
             {
 
-                //Handle unexpected errors when retrieving the booking
+                // Handle unexpected errors when retrieving the booking
                 _logger.LogError(
                     ex,
                     "Feil ved henting av booking med ID {BookingId}.",
@@ -104,7 +104,7 @@ namespace StudyRoomBooking.Controllers
         }
 
 
-        //Display the form for creating a new booking 
+        // Display the form for creating a new booking 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -112,7 +112,7 @@ namespace StudyRoomBooking.Controllers
             Booking booking)
         {
 
-            //Validate user input on the server before saving to the database
+            // Validate user input on the server before saving to the database
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -129,11 +129,11 @@ namespace StudyRoomBooking.Controllers
                     booking.RoomName);
 
 
-                //Add the new booking to the database
+                // Add the new booking to the database
                 _context.Add(booking);
 
 
-                //Save the changes to the database
+                // Save the changes to the database
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation(
@@ -145,7 +145,7 @@ namespace StudyRoomBooking.Controllers
             catch (Exception ex)
             {
 
-                //Handle unexpected database errors
+                // Handle unexpected database errors
                 _logger.LogError(
                     ex,
                     "Feil ved oppretting av booking.");
@@ -158,7 +158,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-        //Display the form for editing an existing booking
+        // Display the form for editing an existing booking
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -216,7 +216,11 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
+<<<<<<< Updated upstream
              //Validate user input on the server before updating the booking in the database
+=======
+// Validate user input on the server before updating the booking in the database
+>>>>>>> Stashed changes
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -244,7 +248,7 @@ namespace StudyRoomBooking.Controllers
             catch (DbUpdateConcurrencyException ex)
             {
 
-                //Handle conflicts when the booking has been modified or deleted by another reequest
+                //Handle conflicts when the booking has been modified or deleted by another request
                 _logger.LogError(
                     ex,
                     "Concurrency-feil ved booking {BookingId}.",
@@ -274,7 +278,11 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+<<<<<<< Updated upstream
          //Display the delete confirmation page for a booking
+=======
+// Display the delete confirmation page for a booking
+>>>>>>> Stashed changes
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -316,7 +324,11 @@ namespace StudyRoomBooking.Controllers
         }
 
 
+<<<<<<< Updated upstream
         //DeleteConfirmed action method to handle the deletion of a booking
+=======
+// DeleteConfirmed action method to handle the deletion of a booking
+>>>>>>> Stashed changes
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
