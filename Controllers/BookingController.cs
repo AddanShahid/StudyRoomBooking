@@ -216,7 +216,7 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
-//Validate user input on the server before updating the booking in the database
+             //Validate user input on the server before updating the booking in the database
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -274,7 +274,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-//Display the delete confirmation page for a booking
+         //Display the delete confirmation page for a booking
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -316,7 +316,7 @@ namespace StudyRoomBooking.Controllers
         }
 
 
-//DeleteConfirmed action method to handle the deletion of a booking
+        //DeleteConfirmed action method to handle the deletion of a booking
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -341,11 +341,11 @@ namespace StudyRoomBooking.Controllers
                     return NotFound();
                 }
 
-// Remove the booking from the database
+                // Remove the booking from the database
                 _context.Bookings.Remove(booking);
 
 
-// Save changes to the database
+         // Save changes to the database
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation(
@@ -367,7 +367,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-// Private helper method to check if a booking exists        
+        // Private helper method to check if a booking exists        
         private bool BookingExists(int id)
         {
             return _context.Bookings.Any(e => e.Id == id);
