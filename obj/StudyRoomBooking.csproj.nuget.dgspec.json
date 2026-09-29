@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj": {}
+    "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj": {
+    "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
+        "projectUniqueName": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
         "projectName": "StudyRoomBooking",
-        "projectPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\StudyRoomBooking.csproj",
-        "packagesPath": "C:\\Users\\Burha\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Burha\\OneDrive\\Documents\\GitHub\\StudyRoomBooking\\obj\\",
+        "projectPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\StudyRoomBooking.csproj",
+        "packagesPath": "C:\\Users\\addan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\addan\\OneDrive\\Skrivebord\\StudyRoomBooking\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Burha\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\addan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
