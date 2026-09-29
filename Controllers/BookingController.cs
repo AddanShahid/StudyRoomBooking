@@ -20,6 +20,8 @@ namespace StudyRoomBooking.Controllers
             _logger = logger;
         }
 
+
+        //Display all the bookings from the database
         public async Task<IActionResult> Index()
         {
             try
@@ -37,6 +39,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle unexpected errors when reading from the database
                 _logger.LogError(
                     ex,
                     "Feil ved henting av bookinger.");
@@ -46,6 +50,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+        //Display the details of a specific booking
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -78,6 +83,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle unexpected errors when retrieving the booking
                 _logger.LogError(
                     ex,
                     "Feil ved henting av booking med ID {BookingId}.",
@@ -96,12 +103,16 @@ namespace StudyRoomBooking.Controllers
             return View();
         }
 
+
+        //Display the form for creating a new booking 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("Id,StudentName,RoomName,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
+
+            //Validate user input on the server before saving to the database
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -117,8 +128,12 @@ namespace StudyRoomBooking.Controllers
                     booking.StudentName,
                     booking.RoomName);
 
+
+                //Add the new booking to the database
                 _context.Add(booking);
 
+
+                //Save the changes to the database
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation(
@@ -129,6 +144,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle unexpected database errors
                 _logger.LogError(
                     ex,
                     "Feil ved oppretting av booking.");
@@ -141,6 +158,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+        //Display the form for editing an existing booking
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -168,6 +186,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle unexpected errors when retrieving the booking 
                 _logger.LogError(
                     ex,
                     "Feil ved henting av booking {BookingId}.",
@@ -178,6 +198,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+        //Update the booking after validating the submitted form
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -185,6 +206,8 @@ namespace StudyRoomBooking.Controllers
             [Bind("Id,StudentName,RoomName,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
+
+            //Check if the booking ID in the URL matches the booking ID in the form data
             if (id != booking.Id)
             {
                 _logger.LogWarning(
@@ -193,6 +216,7 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
+//Validate user input on the server before updating the booking in the database
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
@@ -204,8 +228,11 @@ namespace StudyRoomBooking.Controllers
 
             try
             {
+                //Mark the booking entity as modified 
                 _context.Update(booking);
 
+                
+                // Save updated booking to the database
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation(
@@ -216,6 +243,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (DbUpdateConcurrencyException ex)
             {
+
+                //Handle conflicts when the booking has been modified or deleted by another reequest
                 _logger.LogError(
                     ex,
                     "Concurrency-feil ved booking {BookingId}.",
@@ -230,6 +259,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle unexpected errors and log them
                 _logger.LogError(
                     ex,
                     "Feil ved oppdatering av booking {BookingId}.",
@@ -243,6 +274,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+//Display the delete confirmation page for a booking
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -271,6 +303,8 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+
+                //Handle the error and log it
                 _logger.LogError(
                     ex,
                     "Feil ved henting av booking {BookingId}.",
@@ -281,9 +315,13 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+
+//DeleteConfirmed action method to handle the deletion of a booking
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        
+        
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
@@ -303,8 +341,11 @@ namespace StudyRoomBooking.Controllers
                     return NotFound();
                 }
 
+// Remove the booking from the database
                 _context.Bookings.Remove(booking);
 
+
+// Save changes to the database
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation(
@@ -315,6 +356,7 @@ namespace StudyRoomBooking.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error and return a problem response
                 _logger.LogError(
                     ex,
                     "Feil ved sletting av booking {BookingId}.",
@@ -325,6 +367,7 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
+// Private helper method to check if a booking exists        
         private bool BookingExists(int id)
         {
             return _context.Bookings.Any(e => e.Id == id);
