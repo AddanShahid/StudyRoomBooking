@@ -24,6 +24,7 @@ namespace StudyRoomBooking.Controllers
         {
             try
             {
+
                 _logger.LogInformation("Henter alle bookinger.");
 
                 var bookings = await _context.Bookings.ToListAsync();
