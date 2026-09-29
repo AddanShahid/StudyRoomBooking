@@ -29,3 +29,25 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.book-room-bubble {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    height: 70px;
+    margin-top: 35px;
+    border-radius: 20px;
+    background-color: #9f558f;
+    color: white;
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+}
+
+.book-room-bubble:hover {
+    color: white;
+    text-decoration: none;
+    transform: scale(1.05);
+}
