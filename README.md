@@ -125,7 +125,8 @@ The current version of the application is an MVP and focuses on the core booking
 Further improvements planned for the final project may include:
 
 - Preventing users from booking the same study room at overlapping times.
-- fix and change the colors on site.
+- fix and change the colors on site before the final delivery.  
 - giving the students an overview of what rooms are availible 
 - Improving the user interface and user experience.
 - Adding additional features based on the requirements of the final project.
+
