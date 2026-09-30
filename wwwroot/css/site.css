@@ -9,7 +9,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #9f558f;
 }
 
 html {
@@ -34,8 +34,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 220px;
-    height: 70px;
+    width: 180px;
+    height: 55px;
     margin-top: 35px;
     border-radius: 20px;
     background-color: #9f558f;
@@ -50,4 +50,77 @@ body {
     color: white;
     text-decoration: none;
     transform: scale(1.05);
+}
+
+.booking-create-button {
+    background-color: #9f558f;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+}
+
+.booking-create-button:hover {
+    background-color: #a06c95;
+    color: white;
+}
+
+.booking-edit-button,
+.booking-details-button,
+.booking-delete-button {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 7px;
+    text-decoration: none;
+    margin-right: 3px;
+}
+
+.booking-edit-button {
+    color: #9f558f;
+    border: 1px solid #9f558f;
+}
+
+.booking-details-button {
+    color: #9f558f;
+    border: 1px solid #9f558f;
+}
+
+.booking-delete-button {
+    color: #940e0e;
+    border: 1px solid #940e0e;
+}
+
+.booking-edit-button:hover {
+    background-color: #9f558f;
+    color: white;
+}
+
+.booking-details-button:hover {
+    background-color: #9f558f;
+    color: white;
+}
+
+.booking-delete-button:hover {
+    background-color: #940e0e;
+    color: white;
+}
+
+.booking-back-button {
+    display: inline-block;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #9f558f;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.booking-back-button:hover {
+    background-color: #a06c95;
+    color: white;
 }
