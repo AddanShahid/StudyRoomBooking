@@ -21,9 +21,11 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="RoomName" class="control-label">Room</label>
-                <input asp-for="RoomName" class="form-control" placeholder="e.g. Room 101" />
-                <span asp-validation-for="RoomName" class="text-danger"></span>
+                <label asp-for="RoomId" class="control-label">Room</label>
+                <select asp-for="RoomId" asp-items="ViewBag.RoomId" class="form-select">
+                    <option value="0">Choose a room</option>
+                </select>
+                <span asp-validation-for="RoomId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">

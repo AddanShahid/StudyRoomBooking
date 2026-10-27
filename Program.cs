@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
+using StudyRoomBooking.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Repositories (DAL) used by the controllers instead of the DbContext directly
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+
 var app = builder.Build();
+
+// Create or update the database and add example data if it is empty
+DbInit.Seed(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
