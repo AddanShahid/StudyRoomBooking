@@ -6,6 +6,7 @@ namespace StudyRoomBooking.Models
     // utstyr som kan være tilgjengelig i flere rom
     public class Equipment
     {
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "Equipment name is required.")]
         [StringLength(100)]
