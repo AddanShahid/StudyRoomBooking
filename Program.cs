@@ -12,6 +12,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Repositories (DAL) used by the controllers instead of the DbContext directly
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IParticipationRepository, ParticipationRepository>();
 
 var app = builder.Build();
 

@@ -32,5 +32,8 @@ namespace StudyRoomBooking.Models
         // Navigation property filled by EF Core. Not posted from forms, so it is excluded from validation.
         [ValidateNever]
         public virtual List<Booking> Bookings { get; set; } = new();
+
+        [ValidateNever]
+        public virtual List<Equipment> Equipment { get; set; } = new();
     }
 }

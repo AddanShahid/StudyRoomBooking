@@ -47,6 +47,9 @@ namespace StudyRoomBooking.Models
         [ValidateNever]
         public virtual Room? Room { get; set; }
 
+        [ValidateNever]
+        public virtual List<Participation> Participations { get; set; } = new();
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (StartTime >= EndTime)

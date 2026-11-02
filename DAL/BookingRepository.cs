@@ -36,8 +36,10 @@ namespace StudyRoomBooking.DAL
             try
             {
                 return await _db.Bookings
-                    .Include(b => b.Room)
-                    .FirstOrDefaultAsync(b => b.Id == id);
+                .Include(b => b.Room)
+                .ThenInclude(r => r!.Equipment)
+                .Include(b => b.Participations)
+             .FirstOrDefaultAsync(b => b.Id == id);
             }
             catch (Exception e)
             {

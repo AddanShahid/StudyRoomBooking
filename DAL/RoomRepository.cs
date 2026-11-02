@@ -22,6 +22,7 @@ namespace StudyRoomBooking.DAL
                 // Bookings are included so the views can show how busy each room is.
                 return await _db.Rooms
                     .Include(r => r.Bookings)
+                    .Include(r => r.Equipment)
                     .OrderBy(r => r.Name)
                     .ToListAsync();
             }
@@ -38,6 +39,7 @@ namespace StudyRoomBooking.DAL
             {
                 return await _db.Rooms
                     .Include(r => r.Bookings)
+                    .Include(r => r.Equipment)
                     .FirstOrDefaultAsync(r => r.Id == id);
             }
             catch (Exception e)

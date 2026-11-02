@@ -12,6 +12,8 @@ namespace StudyRoomBooking.Data
 
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Equipment> Equipments { get; set; }
+        public DbSet<Participation> Participations { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +27,21 @@ namespace StudyRoomBooking.Data
                 .WithMany(r => r.Bookings)
                 .HasForeignKey(b => b.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+                // Many-to-many relationship between Room and Equipment.
+            modelBuilder.Entity<Room>()
+                .HasMany(r => r.Equipment)
+                .WithMany(e => e.Rooms);
+
+               // One-to-many relationship between Booking and Participation.
+            modelBuilder.Entity<Participation>()
+                .HasOne(p => p.Booking)
+                .WithMany(b => b.Participations)
+                .HasForeignKey(p => p.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
+
+
     }
+
 }
