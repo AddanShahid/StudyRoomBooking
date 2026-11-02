@@ -1,11 +1,17 @@
+
 @model IEnumerable<StudyRoomBooking.Models.Room>
 
 @{
     ViewData["Title"] = "Romoversikt";
-    var bookedRooms = (List<string>)ViewBag.BookedRooms;
-    bool hasTimeFilter = ViewBag.SelectedDate != null
-        && ViewBag.SelectedStartTime != null
-        && ViewBag.SelectedEndTime != null;
+
+    var bookedRooms = ViewBag.BookedRooms as List<string> ?? new List<string>();
+    var equipments = ViewBag.Equipments as List<StudyRoomBooking.Models.Equipment>
+                     ?? new List<StudyRoomBooking.Models.Equipment>();
+
+    bool hasTimeFilter =
+        ViewBag.SelectedDate != null &&
+        ViewBag.SelectedStartTime != null &&
+        ViewBag.SelectedEndTime != null;
 }
 
 <h1>Romoversikt</h1>
@@ -23,13 +29,13 @@
     <div class="mb-3">
         <label class="form-label">Fra klokkeslett</label>
         <input type="time" name="startTime" class="form-control"
-               value="@(ViewBag.SelectedStartTime == null ? "" : ViewBag.SelectedStartTime.ToString("HH:mm"))" />
+               value="@(ViewBag.SelectedStartTime == null ? "" : ((TimeOnly)ViewBag.SelectedStartTime).ToString("HH:mm"))" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Til klokkeslett</label>
         <input type="time" name="endTime" class="form-control"
-               value="@(ViewBag.SelectedEndTime == null ? "" : ViewBag.SelectedEndTime.ToString("HH:mm"))" />
+               value="@(ViewBag.SelectedEndTime == null ? "" : ((TimeOnly)ViewBag.SelectedEndTime).ToString("HH:mm"))" />
     </div>
 
     <div class="mb-3">
@@ -37,7 +43,7 @@
         <select name="equipmentId" class="form-select">
             <option value="">Alt utstyr</option>
 
-            @foreach (var equipment in ViewBag.Equipments)
+            @foreach (var equipment in equipments)
             {
                 <option value="@equipment.Id">@equipment.Name</option>
             }
@@ -52,7 +58,6 @@
 
     <button type="submit" class="btn btn-primary">Filtrer</button>
     <a asp-action="Index" class="btn btn-secondary">Nullstill</a>
-
 </form>
 
 <table class="table table-striped mt-3">
@@ -63,6 +68,7 @@
             <th>Kapasitet</th>
             <th>Utstyr</th>
             <th>Beskrivelse</th>
+            <th>Åpningstid</th>
             <th>Tilgjengelighet</th>
         </tr>
     </thead>
@@ -92,9 +98,25 @@
                 <td>@room.Description</td>
 
                 <td>
+                    @room.OpeningTime.ToString("HH:mm") -
+                    @room.ClosingTime.ToString("HH:mm")
+                </td>
+
+                <td>
                     @if (hasTimeFilter)
                     {
-                        if (bookedRooms.Contains(room.Name))
+                        var start = (TimeOnly)ViewBag.SelectedStartTime;
+                        var end = (TimeOnly)ViewBag.SelectedEndTime;
+
+                        if (start >= end)
+                        {
+                            <span class="text-danger">Ugyldig tidspunkt</span>
+                        }
+                        else if (start < room.OpeningTime || end > room.ClosingTime)
+                        {
+                            <span class="text-muted">Stengt</span>
+                        }
+                        else if (bookedRooms.Contains(room.Name))
                         {
                             <span class="text-danger">Opptatt</span>
                         }
@@ -105,7 +127,7 @@
                     }
                     else
                     {
-                        <span class="text-muted">Velg tidspunkt</span>
+                        <span class="text-success">Velg tidspunkt</span>
                     }
                 </td>
             </tr>

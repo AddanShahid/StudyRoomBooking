@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
@@ -21,6 +22,14 @@ namespace StudyRoomBooking.Controllers
             int? equipmentId,
             int? minCapacity)
         {
+            // Fix old rooms with missing opening hours
+            _context.Rooms
+                .Where(r => r.OpeningTime == TimeOnly.MinValue
+                         && r.ClosingTime == TimeOnly.MinValue)
+                .ExecuteUpdate(s => s
+                    .SetProperty(r => r.OpeningTime, new TimeOnly(8, 0))
+                    .SetProperty(r => r.ClosingTime, new TimeOnly(16, 0)));
+
             var rooms = _context.Rooms
                 .Include(r => r.Equipments)
                 .ToList();

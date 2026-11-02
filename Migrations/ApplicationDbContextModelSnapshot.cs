@@ -97,6 +97,9 @@ namespace StudyRoomBooking.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("INTEGER");
 
+                    b.Property<TimeOnly>("ClosingTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -105,6 +108,9 @@ namespace StudyRoomBooking.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("OpeningTime")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

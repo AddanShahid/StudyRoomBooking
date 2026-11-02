@@ -30,6 +30,16 @@
     </div>
 
     <div class="mb-3">
+        <label asp-for="OpeningTime">Åpningstid</label>
+        <input asp-for="OpeningTime" type="time" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ClosingTime">Stengetid</label>
+        <input asp-for="ClosingTime" type="time" class="form-control" />
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">Tilgjengelig utstyr</label>
 
         @if (ViewBag.Equipments != null)
