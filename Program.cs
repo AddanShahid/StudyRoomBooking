@@ -30,5 +30,14 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapControllerRoute(
+    name: "equipment",
+    pattern: "Equipment/{action=Index}/{id?}",
+    defaults: new { controller = "Equipment" });    
+
+Console.WriteLine("CONTROLLERS: " +
+    string.Join(", ", app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>()
+    .ActionDescriptors.Items.Select(x => x.DisplayName)));    
+
 
 app.Run();

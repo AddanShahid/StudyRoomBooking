@@ -11,5 +11,9 @@ namespace StudyRoomBooking.Data
         }
 
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+
+        public DbSet<Equipment> Equipments { get; set; }
+
     }
 }
