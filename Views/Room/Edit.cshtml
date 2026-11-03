@@ -65,7 +65,7 @@
                            type="checkbox"
                            name="selectedEquipment"
                            value="@equipment.Id"
-                           checked="@Model.Equipments.Any(e => e.Id == equipment.Id)" />
+                           checked="@Model.Equipment.Any(e => e.Id == equipment.Id)" />
 
                     <label class="form-check-label">
                         @equipment.Name
@@ -87,5 +87,7 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

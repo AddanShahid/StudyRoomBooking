@@ -23,7 +23,6 @@ namespace StudyRoomBooking.Controllers
                     Id = e.Id,
                     Name = e.Name,
                     Description = e.Description,
-                    Quantity = e.Quantity
                 })
                 .ToList();
 

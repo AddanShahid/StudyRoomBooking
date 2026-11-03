@@ -57,9 +57,13 @@ namespace StudyRoomBooking.Controllers
             return View(booking);
         }
 
+       
+        // Display the booking form and search for available rooms
         public async Task<IActionResult> Create(
             DateTime? date, TimeOnly? startTime, TimeOnly? endTime)
         {
+            _logger.LogInformation("Create-siden ble åpnet.");
+
             ViewBag.SearchDate = date;
             ViewBag.SearchStartTime = startTime;
             ViewBag.SearchEndTime = endTime;
@@ -83,17 +87,6 @@ namespace StudyRoomBooking.Controllers
             return View(booking);
         }
 
-        // Display the form for creating a new booking
-        public async Task<IActionResult> Create()
-        {
-            _logger.LogInformation("Create-siden ble åpnet.");
-
-            await LoadRoomOptions();
-
-            return View(new Booking());
-        }
-
-
         // Save a new booking after validating the submitted form
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -106,17 +99,31 @@ namespace StudyRoomBooking.Controllers
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Forsøk på å opprette booking med ugyldige data.");
+                _logger.LogWarning(
+                    "Forsøk på å opprette booking med ugyldige data.");
 
-                await LoadRoomOptions(booking.RoomId);
+                ViewBag.SearchDate = booking.Date;
+                ViewBag.SearchStartTime = booking.StartTime;
+                ViewBag.SearchEndTime = booking.EndTime;
+
+                ViewBag.Rooms = await GetAvailableRooms(
+                    booking.Date, booking.StartTime, booking.EndTime);
+
                 return View(booking);
             }
 
             if (!await _bookingRepository.Create(booking))
             {
-                ModelState.AddModelError("", "Det oppstod en feil ved lagring av bookingen.");
+                ModelState.AddModelError(
+                    "", "Det oppstod en feil ved lagring av bookingen.");
 
-                await LoadRoomOptions(booking.RoomId);
+                ViewBag.SearchDate = booking.Date;
+                ViewBag.SearchStartTime = booking.StartTime;
+                ViewBag.SearchEndTime = booking.EndTime;
+
+                ViewBag.Rooms = await GetAvailableRooms(
+                    booking.Date, booking.StartTime, booking.EndTime);
+
                 return View(booking);
             }
 
@@ -128,6 +135,7 @@ namespace StudyRoomBooking.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // Display the form for editing an existing booking
         public async Task<IActionResult> Edit(int? id)
@@ -258,6 +266,36 @@ namespace StudyRoomBooking.Controllers
                     $"The room is already booked from {overlap.StartTime:HH:mm} to {overlap.EndTime:HH:mm} on this day.");
             }
         }
+
+        
+        // Find rooms that are available at the selected date and time
+        private async Task<List<Room>> GetAvailableRooms(
+            DateTime date, TimeOnly startTime, TimeOnly endTime)
+        {
+            var rooms = await _roomRepository.GetAll();
+            var bookings = await _bookingRepository.GetAll();
+
+            if (rooms == null || bookings == null)
+            {
+                _logger.LogError(
+                    "Could not retrieve rooms or bookings when searching for available rooms.");
+
+                return new List<Room>();
+            }
+
+            var bookedRoomIds = bookings
+                .Where(b =>
+                    b.Date.Date == date.Date &&
+                    b.StartTime < endTime &&
+                    startTime < b.EndTime)
+                .Select(b => b.RoomId)
+                .ToHashSet();
+
+            return rooms
+                .Where(room => !bookedRoomIds.Contains(room.Id))
+                .ToList();
+        }
+
 
         // Fill the room dropdown used by the Create and Edit forms
         private async Task LoadRoomOptions(int? selectedRoomId = null)

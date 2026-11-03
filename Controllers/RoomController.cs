@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
@@ -32,7 +33,7 @@ namespace StudyRoomBooking.Controllers
                     .SetProperty(r => r.ClosingTime, new TimeOnly(16, 0)));
 
             var rooms = _context.Rooms
-                .Include(r => r.Equipments)
+                .Include(r => r.Equipment)
                 .ToList();
 
             ViewBag.Equipments = _context.Equipments.ToList();
@@ -49,7 +50,7 @@ namespace StudyRoomBooking.Controllers
                     .Where(b => b.Date.Date == date.Value.Date
                         && b.StartTime < endTime.Value
                         && b.EndTime > startTime.Value)
-                    .Select(b => b.RoomName)
+                    .Select(b => b.Room != null ? b.Room.Name : "")
                     .ToList();
 
                 ViewBag.BookedRooms = bookedRoomNames;
@@ -58,7 +59,7 @@ namespace StudyRoomBooking.Controllers
             if (equipmentId.HasValue)
             {
                 rooms = rooms
-                    .Where(r => r.Equipments.Any(e => e.Id == equipmentId.Value))
+                    .Where(r => r.Equipment.Any(e => e.Id == equipmentId.Value))
                     .ToList();
             }
 
@@ -79,7 +80,7 @@ namespace StudyRoomBooking.Controllers
                 Description = r.Description,
                 OpeningTime = r.OpeningTime,
                 ClosingTime = r.ClosingTime,
-                Equipments = r.Equipments
+                Equipments = r.Equipment
             }).ToList();
 
             return View(roomViewModels);
@@ -101,7 +102,7 @@ namespace StudyRoomBooking.Controllers
             {
                 selectedEquipment ??= new List<int>();
 
-                room.Equipments = _context.Equipments
+                room.Equipment = _context.Equipments
                     .Where(e => selectedEquipment.Contains(e.Id))
                     .ToList();
 
@@ -122,7 +123,7 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
 
             var room = _context.Rooms
-                .Include(r => r.Equipments)
+                .Include(r => r.Equipment)
                 .FirstOrDefault(r => r.Id == id);
 
             if (room == null)
@@ -145,7 +146,7 @@ namespace StudyRoomBooking.Controllers
             }
 
             var existingRoom = _context.Rooms
-                .Include(r => r.Equipments)
+                .Include(r => r.Equipment)
                 .FirstOrDefault(r => r.Id == room.Id);
 
             if (existingRoom == null)
@@ -160,7 +161,7 @@ namespace StudyRoomBooking.Controllers
 
             selectedEquipment ??= new List<int>();
 
-            existingRoom.Equipments = _context.Equipments
+            existingRoom.Equipment = _context.Equipments
                 .Where(e => selectedEquipment.Contains(e.Id))
                 .ToList();
 
@@ -176,7 +177,7 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
 
             var room = _context.Rooms
-                .Include(r => r.Equipments)
+                .Include(r => r.Equipment)
                 .FirstOrDefault(r => r.Id == id);
 
             if (room == null)
@@ -192,14 +193,14 @@ namespace StudyRoomBooking.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             var room = _context.Rooms
-                .Include(r => r.Equipments)
+                .Include(r => r.Equipment)
                 .FirstOrDefault(r => r.Id == id);
 
             if (room == null)
                 return NotFound();
 
             // Remove equipment relationships first
-            room.Equipments.Clear();
+            room.Equipment.Clear();
 
             _context.Rooms.Remove(room);
             _context.SaveChanges();
