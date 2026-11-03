@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StudyRoomBooking.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,6 +48,40 @@ namespace StudyRoomBooking.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Equipments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 300, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Equipments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Location = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Capacity = table.Column<int>(type: "INTEGER", nullable: false),
+                    HasWhiteboard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    HasScreen = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    OpeningTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
+                    ClosingTime = table.Column<TimeOnly>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,6 +190,76 @@ namespace StudyRoomBooking.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    StudentName = table.Column<string>(type: "TEXT", maxLength: 60, nullable: false),
+                    RoomId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Subject = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Topic = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
+                    EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EquipmentRoom",
+                columns: table => new
+                {
+                    EquipmentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RoomsId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EquipmentRoom", x => new { x.EquipmentId, x.RoomsId });
+                    table.ForeignKey(
+                        name: "FK_EquipmentRoom_Equipments_EquipmentId",
+                        column: x => x.EquipmentId,
+                        principalTable: "Equipments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EquipmentRoom_Rooms_RoomsId",
+                        column: x => x.RoomsId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Participations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    StudentName = table.Column<string>(type: "TEXT", maxLength: 60, nullable: false),
+                    BookingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Participations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Participations_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -192,6 +296,27 @@ namespace StudyRoomBooking.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_RoomId",
+                table: "Bookings",
+                column: "RoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EquipmentRoom_RoomsId",
+                table: "EquipmentRoom",
+                column: "RoomsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Participations_BookingId",
+                table: "Participations",
+                column: "BookingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_Name",
+                table: "Rooms",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -213,10 +338,25 @@ namespace StudyRoomBooking.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "EquipmentRoom");
+
+            migrationBuilder.DropTable(
+                name: "Participations");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Equipments");
+
+            migrationBuilder.DropTable(
+                name: "Bookings");
+
+            migrationBuilder.DropTable(
+                name: "Rooms");
         }
     }
 }
