@@ -17,20 +17,20 @@ namespace StudyRoomBooking.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
 
-            modelBuilder.Entity("EquipmentRoom", b =>
-                {
-                    b.Property<int>("EquipmentsId")
-                        .HasColumnType("INTEGER");
+                modelBuilder.Entity("EquipmentRoom", b =>
+            {
+                b.Property<int>("EquipmentId")
+                    .HasColumnType("INTEGER");
 
-                    b.Property<int>("RoomsId")
-                        .HasColumnType("INTEGER");
+                b.Property<int>("RoomsId")
+                    .HasColumnType("INTEGER");
 
-                    b.HasKey("EquipmentsId", "RoomsId");
+                b.HasKey("EquipmentId", "RoomsId");
 
-                    b.HasIndex("RoomsId");
+                b.HasIndex("RoomsId");
 
-                    b.ToTable("EquipmentRoom");
-                });
+                b.ToTable("EquipmentRoom");
+            });
 
             modelBuilder.Entity("StudyRoomBooking.Models.Booking", b =>
                 {
@@ -44,25 +44,29 @@ namespace StudyRoomBooking.Migrations
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RoomName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("RoomId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("StudentName")
                         .IsRequired()
+                        .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Topic")
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Bookings");
                 });
@@ -74,55 +78,92 @@ namespace StudyRoomBooking.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
+                        .HasMaxLength(300)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.ToTable("Equipments");
                 });
 
-            modelBuilder.Entity("StudyRoomBooking.Models.Room", b =>
+            modelBuilder.Entity("StudyRoomBooking.Models.Participation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Capacity")
+                    b.Property<int>("BookingId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<TimeOnly>("ClosingTime")
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("StudentName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly>("OpeningTime")
+                        .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Rooms");
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("Participations");
                 });
+
+           modelBuilder.Entity("StudyRoomBooking.Models.Room", b =>
+                {
+                    b.Property<int>("Id")
+                     .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                     b.Property<int>("Capacity")
+                    .HasColumnType("INTEGER");
+
+                     b.Property<TimeOnly>("ClosingTime")
+                      .HasColumnType("TEXT");
+
+                     b.Property<string>("Description")
+                      .HasMaxLength(500)
+                     .HasColumnType("TEXT");
+
+                     b.Property<bool>("HasScreen")
+                    .HasColumnType("INTEGER");
+
+                     b.Property<bool>("HasWhiteboard")
+                      .HasColumnType("INTEGER");
+
+                     b.Property<string>("Location")
+                     .IsRequired()
+                     .HasMaxLength(100)
+                     .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("TEXT");
+
+                     b.Property<TimeOnly>("OpeningTime")
+                     .HasColumnType("TEXT");
+
+                     b.HasKey("Id");
+
+                     b.HasIndex("Name")
+                     .IsUnique();
+
+                     b.ToTable("Rooms");
+                 });
 
             modelBuilder.Entity("EquipmentRoom", b =>
                 {
                     b.HasOne("StudyRoomBooking.Models.Equipment", null)
                         .WithMany()
-                        .HasForeignKey("EquipmentsId")
+                        .HasForeignKey("EquipmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -132,6 +173,48 @@ namespace StudyRoomBooking.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
+
+            modelBuilder.Entity("StudyRoomBooking.Models.Booking", b =>
+                {
+                    b.HasOne("StudyRoomBooking.Models.Room", "Room")
+                        .WithMany("Bookings")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("StudyRoomBooking.Models.Participation", b =>
+                {
+                    b.HasOne("StudyRoomBooking.Models.Booking", "Booking")
+                        .WithMany("Participations")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("StudyRoomBooking.Models.Booking", b =>
+                {
+                    b.Navigation("Participations");
+                });
+
+            modelBuilder.Entity("StudyRoomBooking.Models.Room", b =>
+                {
+                    b.Navigation("Bookings");
+                });
+modelBuilder.Entity("StudyRoomBooking.Models.Equipment", b =>
+{
+    b.Navigation("Rooms");
+});
+
+modelBuilder.Entity("StudyRoomBooking.Models.Room", b =>
+{
+    b.Navigation("Equipment");
+});
+                
 #pragma warning restore 612, 618
         }
     }

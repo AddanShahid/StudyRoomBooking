@@ -66,17 +66,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="RoomName">Velg rom</label>
-                        <select asp-for="RoomName" class="form-select">
+                        <label asp-for="RoomId">Velg rom</label>
+                        <select asp-for="RoomId" class="form-select">
                             <option value="">Velg et rom</option>
                             @foreach (var room in rooms)
                             {
-                                <option value="@room.Name">
+                                <option value="@room.Id">
                                     @room.Name (Kapasitet: @room.Capacity)
                                 </option>
                             }
                         </select>
-                        <span asp-validation-for="RoomName"
+                        <span asp-validation-for="RoomId"
                               class="text-danger"></span>
                     </div>
 
