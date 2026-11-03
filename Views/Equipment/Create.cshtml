@@ -1,31 +1,36 @@
 @model StudyRoomBooking.Models.Equipment
 
 @{
-    ViewData["Title"] = "Opprett utstyr";
+    ViewData["Title"] = "Add Equipment";
 }
 
-<h1>Legg til utstyr</h1>
+<h1>Add Equipment</h1>
 
 <form asp-action="Create" method="post">
 
     <div class="mb-3">
-        <label asp-for="Name">Navn</label>
+        <label asp-for="Name" class="form-label"></label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Description">Beskrivelse</label>
+        <label asp-for="Description" class="form-label"></label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Quantity">Antall</label>
+        <label asp-for="Quantity" class="form-label"></label>
         <input asp-for="Quantity" type="number" min="0" class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Lagre utstyr</button>
-
-    <a asp-action="Index" class="btn btn-secondary">Tilbake</a>
+    <button type="submit" class="btn btn-primary">Add Equipment</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

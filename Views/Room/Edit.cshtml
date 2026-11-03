@@ -1,0 +1,91 @@
+
+@model StudyRoomBooking.Models.Room
+
+@{
+    ViewData["Title"] = "Endre rom";
+
+    var equipments = ViewBag.Equipments as List<StudyRoomBooking.Models.Equipment>
+                     ?? new List<StudyRoomBooking.Models.Equipment>();
+}
+
+<h1>Endre rom</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Edit" method="post">
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Romnavn</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Location" class="form-label">Plassering</label>
+                <input asp-for="Location" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Capacity" class="form-label">Kapasitet</label>
+                <input asp-for="Capacity" type="number" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Beskrivelse</label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="OpeningTime" class="form-label">Åpningstid</label>
+                <input type="time"
+                       name="OpeningTime"
+                       class="form-control"
+                       value="@Model.OpeningTime.ToString("HH:mm")" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ClosingTime" class="form-label">Stengetid</label>
+                <input type="time"
+                       name="ClosingTime"
+                       class="form-control"
+                       value="@Model.ClosingTime.ToString("HH:mm")" />
+            </div>
+
+            <h5>Utstyr</h5>
+
+            @foreach (var equipment in equipments)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selectedEquipment"
+                           value="@equipment.Id"
+                           checked="@Model.Equipments.Any(e => e.Id == equipment.Id)" />
+
+                    <label class="form-check-label">
+                        @equipment.Name
+                    </label>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary mt-3">
+                Lagre endringer
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary mt-3">
+                Avbryt
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
