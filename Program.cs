@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
 using StudyRoomBooking.DAL;
@@ -9,6 +10,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Identity: users are stored in the same database (no email confirmation for local testing)
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Send users to our own login page when they must be logged in
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/Login";
+});
 // Repositories (DAL) used by the controllers instead of the DbContext directly
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
@@ -23,14 +37,14 @@ DbInit.Seed(app);
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
+app.UseRouting();          // finds which page/controller is requested
 
-app.UseAuthorization();
+app.UseAuthentication();   // who is the user?
+app.UseAuthorization();    // is the user allowed?
 
 app.MapStaticAssets();
 
@@ -39,14 +53,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
 app.MapControllerRoute(
     name: "equipment",
     pattern: "Equipment/{action=Index}/{id?}",
     defaults: new { controller = "Equipment" });    
-
-Console.WriteLine("CONTROLLERS: " +
-    string.Join(", ", app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>()
-    .ActionDescriptors.Items.Select(x => x.DisplayName)));    
-
-
+   
 app.Run();
+
+

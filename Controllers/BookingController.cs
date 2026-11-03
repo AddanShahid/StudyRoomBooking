@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using StudyRoomBooking.DAL;
@@ -57,8 +58,8 @@ namespace StudyRoomBooking.Controllers
             return View(booking);
         }
 
-       
         // Display the booking form and search for available rooms
+        [Authorize]
         public async Task<IActionResult> Create(
             DateTime? date, TimeOnly? startTime, TimeOnly? endTime)
         {
@@ -88,6 +89,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         // Save a new booking after validating the submitted form
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -136,8 +138,8 @@ namespace StudyRoomBooking.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         // Display the form for editing an existing booking
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -159,6 +161,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         // Update the booking after validating the submitted form
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -197,6 +200,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         // Display the delete confirmation page for a booking
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -216,8 +220,8 @@ namespace StudyRoomBooking.Controllers
             return View(booking);
         }
 
-
         // DeleteConfirmed action method to handle the deletion of a booking
+        [Authorize]
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -267,7 +271,6 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-        
         // Find rooms that are available at the selected date and time
         private async Task<List<Room>> GetAvailableRooms(
             DateTime date, TimeOnly startTime, TimeOnly endTime)
@@ -295,7 +298,6 @@ namespace StudyRoomBooking.Controllers
                 .Where(room => !bookedRoomIds.Contains(room.Id))
                 .ToList();
         }
-
 
         // Fill the room dropdown used by the Create and Edit forms
         private async Task LoadRoomOptions(int? selectedRoomId = null)

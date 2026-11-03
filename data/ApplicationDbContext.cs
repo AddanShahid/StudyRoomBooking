@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Models;
 
+
 namespace StudyRoomBooking.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,6 +20,8 @@ namespace StudyRoomBooking.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); 
+            
             modelBuilder.Entity<Room>()
                 .HasIndex(r => r.Name)
                 .IsUnique();
@@ -42,7 +46,13 @@ namespace StudyRoomBooking.Data
                 .OnDelete(DeleteBehavior.Cascade);
         }
 
+        
+
+        
+
 
     }
+
+    
 
 }
