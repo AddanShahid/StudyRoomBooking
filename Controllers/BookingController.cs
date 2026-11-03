@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using StudyRoomBooking.Data;
 using StudyRoomBooking.Models;
 
@@ -95,7 +96,8 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-        public IActionResult Create()
+        [Authorize] 
+        public IActionResult Create() 
         {
             _logger.LogInformation(
                 "Create-siden ble åpnet.");
@@ -103,7 +105,7 @@ namespace StudyRoomBooking.Controllers
             return View();
         }
 
-
+        [Authorize] 
         // Display the form for creating a new booking 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -159,6 +161,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         // Display the form for editing an existing booking
+        [Authorize] 
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -199,6 +202,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         //Update the booking after validating the submitted form
+        [Authorize] 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -275,6 +279,7 @@ namespace StudyRoomBooking.Controllers
         }
 
 // Display the delete confirmation page for a booking
+        [Authorize] 
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -317,6 +322,7 @@ namespace StudyRoomBooking.Controllers
 
 
 // DeleteConfirmed action method to handle the deletion of a booking
+        [Authorize] 
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
