@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
+using StudyRoomBooking.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +23,15 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/Login";
 });
+// Repositories (DAL) used by the controllers instead of the DbContext directly
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IParticipationRepository, ParticipationRepository>();
 
 var app = builder.Build();
+
+// Create or update the database and add example data if it is empty
+DbInit.Seed(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -45,4 +53,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
+app.MapControllerRoute(
+    name: "equipment",
+    pattern: "Equipment/{action=Index}/{id?}",
+    defaults: new { controller = "Equipment" });    
+   
 app.Run();
+
+
