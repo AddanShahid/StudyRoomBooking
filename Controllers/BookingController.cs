@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,28 +23,85 @@ namespace StudyRoomBooking.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        // Show bookings and apply search filters
+        public async Task<IActionResult> Index(
+            string? subject,
+            DateTime? date,
+            int? roomId,
+            int? equipmentId)
         {
-            _logger.LogInformation("Henter alle bookinger.");
+            _logger.LogInformation("Henter bookinger.");
 
             var bookings = await _bookingRepository.GetAll();
 
-            // The repository returns null when the database could not be read
             if (bookings == null)
             {
-                return Problem("Det oppstod en feil ved henting av bookingene.");
+                return Problem("Kunne ikke hente bookinger.");
             }
 
-            _logger.LogInformation("Hentet {Count} bookinger.", bookings.Count());
+            var rooms = await _roomRepository.GetAll();
 
-            return View(bookings);
+            if (rooms == null)
+            {
+                return Problem("Kunne ikke hente rom.");
+            }
+
+            ViewBag.Rooms = rooms.ToList();
+
+            ViewBag.Equipments = rooms
+                .SelectMany(r => r.Equipment)
+                .GroupBy(e => e.Id)
+                .Select(g => g.First())
+                .OrderBy(e => e.Name)
+                .ToList();
+
+            ViewBag.SelectedSubject = subject;
+            ViewBag.SelectedDate = date;
+            ViewBag.SelectedRoomId = roomId;
+            ViewBag.SelectedEquipmentId = equipmentId;
+
+            if (!string.IsNullOrWhiteSpace(subject))
+            {
+                bookings = bookings.Where(b =>
+                    b.Subject.Contains(
+                        subject.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (date.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.Date.Date == date.Value.Date);
+            }
+
+            if (roomId.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.RoomId == roomId.Value);
+            }
+
+            if (equipmentId.HasValue)
+            {
+                var matchingRoomIds = rooms
+                    .Where(r => r.Equipment.Any(e =>
+                        e.Id == equipmentId.Value))
+                    .Select(r => r.Id)
+                    .ToHashSet();
+
+                bookings = bookings.Where(b =>
+                    matchingRoomIds.Contains(b.RoomId));
+            }
+
+            return View(bookings.ToList());
         }
 
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Details ble kalt uten booking-ID.");
+                _logger.LogWarning(
+                    "Details ble kalt uten booking-ID.");
+
                 return NotFound();
             }
 
@@ -51,7 +109,9 @@ namespace StudyRoomBooking.Controllers
 
             if (booking == null)
             {
-                _logger.LogWarning("Fant ikke booking med ID {BookingId}.", id);
+                _logger.LogWarning(
+                    "Fant ikke booking med ID {BookingId}.", id);
+
                 return NotFound();
             }
 
@@ -61,7 +121,9 @@ namespace StudyRoomBooking.Controllers
         // Display the booking form and search for available rooms
         [Authorize]
         public async Task<IActionResult> Create(
-            DateTime? date, TimeOnly? startTime, TimeOnly? endTime)
+            DateTime? date,
+            TimeOnly? startTime,
+            TimeOnly? endTime)
         {
             _logger.LogInformation("Create-siden ble åpnet.");
 
@@ -78,17 +140,21 @@ namespace StudyRoomBooking.Controllers
 
             ViewBag.Rooms = new List<Room>();
 
-            if (date.HasValue && startTime.HasValue &&
-                endTime.HasValue && startTime.Value < endTime.Value)
+            if (date.HasValue &&
+                startTime.HasValue &&
+                endTime.HasValue &&
+                startTime.Value < endTime.Value)
             {
                 ViewBag.Rooms = await GetAvailableRooms(
-                    date.Value, startTime.Value, endTime.Value);
+                    date.Value,
+                    startTime.Value,
+                    endTime.Value);
             }
 
             return View(booking);
         }
 
-        // Save a new booking after validating the submitted form
+        // Save a new booking
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -96,7 +162,6 @@ namespace StudyRoomBooking.Controllers
             [Bind("StudentName,RoomId,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
-            // Validate user input and check that the room is free before saving
             await ValidateRoomAndOverlap(booking);
 
             if (!ModelState.IsValid)
@@ -109,7 +174,9 @@ namespace StudyRoomBooking.Controllers
                 ViewBag.SearchEndTime = booking.EndTime;
 
                 ViewBag.Rooms = await GetAvailableRooms(
-                    booking.Date, booking.StartTime, booking.EndTime);
+                    booking.Date,
+                    booking.StartTime,
+                    booking.EndTime);
 
                 return View(booking);
             }
@@ -117,14 +184,17 @@ namespace StudyRoomBooking.Controllers
             if (!await _bookingRepository.Create(booking))
             {
                 ModelState.AddModelError(
-                    "", "Det oppstod en feil ved lagring av bookingen.");
+                    "",
+                    "Det oppstod en feil ved lagring av bookingen.");
 
                 ViewBag.SearchDate = booking.Date;
                 ViewBag.SearchStartTime = booking.StartTime;
                 ViewBag.SearchEndTime = booking.EndTime;
 
                 ViewBag.Rooms = await GetAvailableRooms(
-                    booking.Date, booking.StartTime, booking.EndTime);
+                    booking.Date,
+                    booking.StartTime,
+                    booking.EndTime);
 
                 return View(booking);
             }
@@ -138,13 +208,15 @@ namespace StudyRoomBooking.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Display the form for editing an existing booking
+        // Display Edit form
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Edit ble kalt uten booking-ID.");
+                _logger.LogWarning(
+                    "Edit ble kalt uten booking-ID.");
+
                 return NotFound();
             }
 
@@ -152,15 +224,18 @@ namespace StudyRoomBooking.Controllers
 
             if (booking == null)
             {
-                _logger.LogWarning("Fant ikke booking {BookingId} for redigering.", id);
+                _logger.LogWarning(
+                    "Fant ikke booking {BookingId} for redigering.", id);
+
                 return NotFound();
             }
 
             await LoadRoomOptions(booking.RoomId);
+
             return View(booking);
         }
 
-        // Update the booking after validating the submitted form
+        // Update booking
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -169,10 +244,10 @@ namespace StudyRoomBooking.Controllers
             [Bind("Id,StudentName,RoomId,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
-            // Check if the booking ID in the URL matches the booking ID in the form data
             if (id != booking.Id)
             {
                 _logger.LogWarning("Booking-ID stemmer ikke.");
+
                 return NotFound();
             }
 
@@ -180,32 +255,42 @@ namespace StudyRoomBooking.Controllers
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Ugyldige data ved redigering av booking {BookingId}.", id);
+                _logger.LogWarning(
+                    "Ugyldige data ved redigering av booking {BookingId}.",
+                    id);
 
                 await LoadRoomOptions(booking.RoomId);
+
                 return View(booking);
             }
 
             if (!await _bookingRepository.Update(booking))
             {
-                ModelState.AddModelError("", "Det oppstod en feil ved oppdatering av bookingen.");
+                ModelState.AddModelError(
+                    "",
+                    "Det oppstod en feil ved oppdatering av bookingen.");
 
                 await LoadRoomOptions(booking.RoomId);
+
                 return View(booking);
             }
 
-            _logger.LogInformation("Booking {BookingId} ble oppdatert.", booking.Id);
+            _logger.LogInformation(
+                "Booking {BookingId} ble oppdatert.",
+                booking.Id);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // Display the delete confirmation page for a booking
+        // Display Delete confirmation
         [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                _logger.LogWarning("Delete ble kalt uten booking-ID.");
+                _logger.LogWarning(
+                    "Delete ble kalt uten booking-ID.");
+
                 return NotFound();
             }
 
@@ -213,36 +298,43 @@ namespace StudyRoomBooking.Controllers
 
             if (booking == null)
             {
-                _logger.LogWarning("Fant ikke booking {BookingId} for sletting.", id);
+                _logger.LogWarning(
+                    "Fant ikke booking {BookingId} for sletting.",
+                    id);
+
                 return NotFound();
             }
 
             return View(booking);
         }
 
-        // DeleteConfirmed action method to handle the deletion of a booking
+        // Delete booking
         [Authorize]
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _logger.LogInformation("Forsøker å slette booking {BookingId}.", id);
+            _logger.LogInformation(
+                "Forsøker å slette booking {BookingId}.",
+                id);
 
             if (!await _bookingRepository.Delete(id))
             {
-                return Problem("Det oppstod en feil ved sletting av bookingen.");
+                return Problem(
+                    "Det oppstod en feil ved sletting av bookingen.");
             }
 
-            _logger.LogInformation("Booking {BookingId} ble slettet.", id);
+            _logger.LogInformation(
+                "Booking {BookingId} ble slettet.",
+                id);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // Domain rule: the chosen room must exist, and a room cannot be booked twice at the same time
+        // Validate room and overlapping bookings
         private async Task ValidateRoomAndOverlap(Booking booking)
         {
-            // Only check the database when the form values themselves are valid
             if (!ModelState.IsValid)
             {
                 return;
@@ -250,7 +342,10 @@ namespace StudyRoomBooking.Controllers
 
             if (await _roomRepository.GetById(booking.RoomId) == null)
             {
-                ModelState.AddModelError(nameof(Booking.RoomId), "The chosen room does not exist.");
+                ModelState.AddModelError(
+                    nameof(Booking.RoomId),
+                    "The chosen room does not exist.");
+
                 return;
             }
 
@@ -271,9 +366,11 @@ namespace StudyRoomBooking.Controllers
             }
         }
 
-        // Find rooms that are available at the selected date and time
+        // Find available rooms
         private async Task<List<Room>> GetAvailableRooms(
-            DateTime date, TimeOnly startTime, TimeOnly endTime)
+            DateTime date,
+            TimeOnly startTime,
+            TimeOnly endTime)
         {
             var rooms = await _roomRepository.GetAll();
             var bookings = await _bookingRepository.GetAll();
@@ -299,13 +396,19 @@ namespace StudyRoomBooking.Controllers
                 .ToList();
         }
 
-        // Fill the room dropdown used by the Create and Edit forms
-        private async Task LoadRoomOptions(int? selectedRoomId = null)
+        // Fill room dropdown
+        private async Task LoadRoomOptions(
+            int? selectedRoomId = null)
         {
-            var rooms = await _roomRepository.GetAll() ?? Enumerable.Empty<Room>();
+            var rooms = await _roomRepository.GetAll()
+                ?? Enumerable.Empty<Room>();
 
             ViewData["RoomId"] = new SelectList(
-                rooms.Select(r => new { r.Id, Label = $"{r.Name} ({r.Location}, {r.Capacity} seats)" }),
+                rooms.Select(r => new
+                {
+                    r.Id,
+                    Label = $"{r.Name} ({r.Location}, {r.Capacity} seats)"
+                }),
                 "Id",
                 "Label",
                 selectedRoomId);

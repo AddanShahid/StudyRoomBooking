@@ -1,16 +1,18 @@
+
 @model IEnumerable<StudyRoomBooking.ViewModels.RoomViewModel>
 
 @{
     ViewData["Title"] = "Romoversikt";
 
-    var bookedRooms = ViewBag.BookedRooms as List<string> ?? new List<string>();
     var equipments = ViewBag.Equipments as List<StudyRoomBooking.Models.Equipment>
                      ?? new List<StudyRoomBooking.Models.Equipment>();
 
-    bool hasTimeFilter =
-        ViewBag.SelectedDate != null &&
-        ViewBag.SelectedStartTime != null &&
-        ViewBag.SelectedEndTime != null;
+    DateTime? selectedDate = ViewBag.SelectedDate;
+    TimeOnly? selectedStartTime = ViewBag.SelectedStartTime;
+    TimeOnly? selectedEndTime = ViewBag.SelectedEndTime;
+
+    int? selectedEquipmentId = ViewBag.SelectedEquipmentId;
+    int? selectedMinCapacity = ViewBag.SelectedMinCapacity;
 }
 
 <h1>Romoversikt</h1>
@@ -18,131 +20,76 @@
 <p>Se rommene, kapasiteten og tilgjengelig utstyr.</p>
 
 <form asp-controller="Room" asp-action="Index" method="get" class="mb-4">
+
     <div class="mb-3">
         <label class="form-label">Dato</label>
-        <input type="date" name="date" class="form-control"
-               value="@(ViewBag.SelectedDate == null ? "" : ((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd"))" />
+        <input type="date"
+               name="date"
+               class="form-control"
+               value="@(selectedDate?.ToString("yyyy-MM-dd"))" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Fra klokkeslett</label>
-        <input type="time" name="startTime" class="form-control"
-               value="@(ViewBag.SelectedStartTime == null ? "" : ((TimeOnly)ViewBag.SelectedStartTime).ToString("HH:mm"))" />
+        <input type="time"
+               name="startTime"
+               class="form-control"
+               value="@(selectedStartTime?.ToString("HH:mm"))" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Til klokkeslett</label>
-        <input type="time" name="endTime" class="form-control"
-               value="@(ViewBag.SelectedEndTime == null ? "" : ((TimeOnly)ViewBag.SelectedEndTime).ToString("HH:mm"))" />
+        <input type="time"
+               name="endTime"
+               class="form-control"
+               value="@(selectedEndTime?.ToString("HH:mm"))" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Filtrer etter utstyr</label>
+
         <select name="equipmentId" class="form-select">
             <option value="">Alt utstyr</option>
+
             @foreach (var equipment in equipments)
             {
-                <option value="@equipment.Id">@equipment.Name</option>
+                if (selectedEquipmentId == equipment.Id)
+                {
+                    <option value="@equipment.Id" selected>
+                        @equipment.Name
+                    </option>
+                }
+                else
+                {
+                    <option value="@equipment.Id">
+                        @equipment.Name
+                    </option>
+                }
             }
         </select>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Minimum kapasitet</label>
-        <input type="number" name="minCapacity" min="1"
-               class="form-control" placeholder="F.eks. 10" />
+
+        <input type="number"
+               name="minCapacity"
+               min="1"
+               class="form-control"
+               placeholder="F.eks. 10"
+               value="@selectedMinCapacity" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Filtrer</button>
-    <a asp-action="Index" class="btn btn-secondary">Nullstill</a>
+    <button type="submit" class="btn btn-primary">
+        Filtrer
+    </button>
+
+    <a asp-controller="Room"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Nullstill
+    </a>
+
 </form>
 
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>Navn</th>
-            <th>Lokasjon</th>
-            <th>Kapasitet</th>
-            <th>Utstyr</th>
-            <th>Beskrivelse</th>
-            <th>Åpningstid</th>
-            <th>Tilgjengelighet</th>
-            <th>Handlinger</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var room in Model)
-        {
-            <tr>
-                <td>@room.Name</td>
-                <td>@room.Location</td>
-                <td>@room.Capacity</td>
-
-                <td>
-                    @if (room.Equipments != null && room.Equipments.Any())
-                    {
-                        @foreach (var equipment in room.Equipments)
-                        {
-                            <span>@equipment.Name</span><br />
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-muted">Ikke registrert</span>
-                    }
-                </td>
-
-                <td>@room.Description</td>
-
-                <td>
-                    @room.OpeningTime.ToString("HH:mm") -
-                    @room.ClosingTime.ToString("HH:mm")
-                </td>
-
-                <td>
-                    @if (hasTimeFilter)
-                    {
-                        var start = (TimeOnly)ViewBag.SelectedStartTime;
-                        var end = (TimeOnly)ViewBag.SelectedEndTime;
-
-                        if (start >= end)
-                        {
-                            <span class="text-danger">Ugyldig tidspunkt</span>
-                        }
-                        else if (start < room.OpeningTime || end > room.ClosingTime)
-                        {
-                            <span class="text-muted">Stengt</span>
-                        }
-                        else if (bookedRooms.Contains(room.Name))
-                        {
-                            <span class="text-danger">Opptatt</span>
-                        }
-                        else
-                        {
-                            <span class="text-success">Ledig</span>
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-success">Velg tidspunkt</span>
-                    }
-                </td>
-
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@room.Id"
-                       class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@room.Id"
-                       class="btn btn-sm btn-danger">
-                        Slett
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<partial name="_RoomTable" model="Model" />
