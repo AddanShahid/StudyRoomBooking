@@ -1,0 +1,67 @@
+@model StudyRoomBooking.Models.Room
+
+@{
+    ViewData["Title"] = "Opprett rom";
+}
+
+<h1>Opprett nytt rom</h1>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Name">Romnavn</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Location">Lokasjon</label>
+        <input asp-for="Location" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Capacity">Kapasitet</label>
+        <input asp-for="Capacity" type="number" min="1" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description">Beskrivelse</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="OpeningTime">Åpningstid</label>
+        <input asp-for="OpeningTime" type="time" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ClosingTime">Stengetid</label>
+        <input asp-for="ClosingTime" type="time" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tilgjengelig utstyr</label>
+
+        @if (ViewBag.Equipments != null)
+        {
+            @foreach (var equipment in ViewBag.Equipments)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selectedEquipment"
+                           value="@equipment.Id" />
+
+                    <label class="form-check-label">
+                        @equipment.Name
+                    </label>
+                </div>
+            }
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Opprett rom</button>
+
+    <a asp-action="Index" class="btn btn-secondary">Tilbake</a>
+
+</form>

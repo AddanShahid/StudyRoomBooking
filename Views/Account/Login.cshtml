@@ -1,0 +1,48 @@
+@model StudyRoomBooking.ViewModels.LoginViewModel
+
+<h2>Login</h2>
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Login" method="post">
+            <!-- Hidden input keeps the ReturnUrl when the form is posted -->
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="showPassword" />
+                <label class="form-check-label" for="showPassword">Show password</label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show or hide the password field when the checkbox is clicked
+        document.getElementById("showPassword").addEventListener("change", function () {
+            const field = document.getElementById("Password");
+            field.type = this.checked ? "text" : "password";
+        });
+    </script>
+}

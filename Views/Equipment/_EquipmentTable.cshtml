@@ -1,0 +1,39 @@
+
+@model IEnumerable<StudyRoomBooking.ViewModels.EquipmentViewModel>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Navn</th>
+                <th>Beskrivelse</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var equipment in Model)
+            {
+                <tr>
+                    <td>@equipment.Name</td>
+                    <td>@equipment.Description</td>
+                    <td>
+                        <a asp-controller="Equipment"
+                           asp-action="Edit"
+                           asp-route-id="@equipment.Id"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Equipment"
+                           asp-action="Delete"
+                           asp-route-id="@equipment.Id"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

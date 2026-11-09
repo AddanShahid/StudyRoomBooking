@@ -1,0 +1,95 @@
+
+@model IEnumerable<StudyRoomBooking.ViewModels.RoomViewModel>
+
+@{
+    ViewData["Title"] = "Romoversikt";
+
+    var equipments = ViewBag.Equipments as List<StudyRoomBooking.Models.Equipment>
+                     ?? new List<StudyRoomBooking.Models.Equipment>();
+
+    DateTime? selectedDate = ViewBag.SelectedDate;
+    TimeOnly? selectedStartTime = ViewBag.SelectedStartTime;
+    TimeOnly? selectedEndTime = ViewBag.SelectedEndTime;
+
+    int? selectedEquipmentId = ViewBag.SelectedEquipmentId;
+    int? selectedMinCapacity = ViewBag.SelectedMinCapacity;
+}
+
+<h1>Romoversikt</h1>
+
+<p>Se rommene, kapasiteten og tilgjengelig utstyr.</p>
+
+<form asp-controller="Room" asp-action="Index" method="get" class="mb-4">
+
+    <div class="mb-3">
+        <label class="form-label">Dato</label>
+        <input type="date"
+               name="date"
+               class="form-control"
+               value="@(selectedDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fra klokkeslett</label>
+        <input type="time"
+               name="startTime"
+               class="form-control"
+               value="@(selectedStartTime?.ToString("HH:mm"))" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Til klokkeslett</label>
+        <input type="time"
+               name="endTime"
+               class="form-control"
+               value="@(selectedEndTime?.ToString("HH:mm"))" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Filtrer etter utstyr</label>
+
+        <select name="equipmentId" class="form-select">
+            <option value="">Alt utstyr</option>
+
+            @foreach (var equipment in equipments)
+            {
+                if (selectedEquipmentId == equipment.Id)
+                {
+                    <option value="@equipment.Id" selected>
+                        @equipment.Name
+                    </option>
+                }
+                else
+                {
+                    <option value="@equipment.Id">
+                        @equipment.Name
+                    </option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Minimum kapasitet</label>
+
+        <input type="number"
+               name="minCapacity"
+               min="1"
+               class="form-control"
+               placeholder="F.eks. 10"
+               value="@selectedMinCapacity" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Filtrer
+    </button>
+
+    <a asp-controller="Room"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Nullstill
+    </a>
+
+</form>
+
+<partial name="_RoomTable" model="Model" />
