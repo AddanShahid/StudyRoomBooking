@@ -1,16 +1,24 @@
 
 using Microsoft.EntityFrameworkCore;
-using SubApp2.Api.Data;
-
+using StudyRoomBooking.Data;
+using StudyRoomBooking.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "studyroom-api.db");
+var dbPath = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, "..", "studyroombooking.db"));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+if (!File.Exists(dbPath))
+{
+    throw new FileNotFoundException("Shared database not found.", dbPath);
+}
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
+
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
