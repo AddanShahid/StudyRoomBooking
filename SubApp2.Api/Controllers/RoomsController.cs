@@ -39,5 +39,32 @@ public class RoomsController : ControllerBase
         }).ToList();
 
         return Ok(roomDtos);
+        
     }
+    [HttpGet("{id:int}")]
+public async Task<ActionResult<RoomDto>> GetRoom(int id)
+{
+    var room = await _roomRepository.GetById(id);
+
+    if (room == null)
+    {
+        return NotFound($"Room with ID {id} was not found.");
+    }
+
+    var roomDto = new RoomDto
+    {
+        Id = room.Id,
+        Name = room.Name,
+        Location = room.Location,
+        Capacity = room.Capacity,
+        Description = room.Description,
+        HasWhiteboard = room.HasWhiteboard,
+        HasScreen = room.HasScreen,
+        OpeningTime = room.OpeningTime,
+        ClosingTime = room.ClosingTime
+    };
+
+    return Ok(roomDto);
+}
+    
 }
