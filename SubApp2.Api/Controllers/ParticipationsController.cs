@@ -11,13 +11,16 @@ public class ParticipationsController : ControllerBase
 {
     private readonly IParticipationRepository _participationRepository;
     private readonly IBookingRepository _bookingRepository;
+    private readonly ILogger<ParticipationsController> _logger;
 
     public ParticipationsController(
         IParticipationRepository participationRepository,
-        IBookingRepository bookingRepository)
+        IBookingRepository bookingRepository,
+        ILogger<ParticipationsController> logger)
     {
         _participationRepository = participationRepository;
         _bookingRepository = bookingRepository;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -91,6 +94,7 @@ public class ParticipationsController : ControllerBase
             return BadRequest("The selected booking does not exist.");
         }
 
+
         var participation = new Participation
         {
             StudentName = dto.StudentName.Trim(),
@@ -106,9 +110,9 @@ public class ParticipationsController : ControllerBase
     booking.StudentName?.Trim(),
     participation.StudentName,
     StringComparison.OrdinalIgnoreCase))
-{
-    return Conflict("The booking organizer is already registered.");
-}
+        {
+            return Conflict("The booking organizer is already registered.");
+        }
 
         var existingParticipations =
             await _participationRepository.GetByBookingId(dto.BookingId);
@@ -143,6 +147,11 @@ public class ParticipationsController : ControllerBase
             return StatusCode(500, "Could not create participation.");
         }
 
+        _logger.LogInformation(
+            "Participation {ParticipationId} created for booking {BookingId}",
+            participation.Id,
+            participation.BookingId);
+
         var participationDto = new ParticipationDto
         {
             Id = participation.Id,
@@ -174,6 +183,10 @@ public class ParticipationsController : ControllerBase
         {
             return StatusCode(500, "Could not delete participation.");
         }
+
+        _logger.LogInformation(
+            "Participation {ParticipationId} deleted",
+            id);
 
         return NoContent();
     }
