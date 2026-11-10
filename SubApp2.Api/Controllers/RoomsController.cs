@@ -172,5 +172,25 @@ public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
 
     return NoContent();
 }
+[HttpDelete("{id:int}")]
+public async Task<IActionResult> DeleteRoom(int id)
+{
+    var room = await _roomRepository.GetById(id);
+
+    if (room == null)
+    {
+        return NotFound($"Room with ID {id} was not found.");
+    }
+
+    var success = await _roomRepository.Delete(id);
+
+    if (!success)
+    {
+        return StatusCode(500, "Could not delete room.");
+    }
+
+    return NoContent();
+}
+
 
 }
