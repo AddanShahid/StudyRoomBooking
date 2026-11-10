@@ -13,35 +13,4 @@
     Legg til utstyr
 </a>
 
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>Navn</th>
-            <th>Beskrivelse</th>
-            <th>Handlinger</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var equipment in Model)
-        {
-            <tr>
-                <td>@equipment.Name</td>
-                <td>@equipment.Description</td>
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@equipment.Id"
-                       class="btn btn-warning btn-sm">
-                        Edit
-                    </a>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@equipment.Id"
-                       class="btn btn-danger btn-sm">
-                        Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<partial name="_EquipmentTable" model="Model" />
