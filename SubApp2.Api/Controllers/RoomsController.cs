@@ -127,5 +127,50 @@ public class RoomsController : ControllerBase
             roomDto
         );
     }
+    [HttpPut("{id:int}")]
+public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
+{
+    var room = await _roomRepository.GetById(id);
+
+    if (room == null)
+    {
+        return NotFound($"Room with ID {id} was not found.");
+    }
+
+    if (dto.OpeningTime >= dto.ClosingTime)
+    {
+        return BadRequest("Opening time must be before closing time.");
+    }
+
+    var roomName = dto.Name.Trim();
+
+    if (roomName.Length < 2)
+    {
+        return BadRequest("Room name must be at least 2 characters long.");
+    }
+
+    if (await _roomRepository.NameExists(roomName, id))
+    {
+        return Conflict("A room with this name already exists.");
+    }
+
+    room.Name = roomName;
+    room.Location = dto.Location;
+    room.Capacity = dto.Capacity;
+    room.Description = dto.Description;
+    room.HasWhiteboard = dto.HasWhiteboard;
+    room.HasScreen = dto.HasScreen;
+    room.OpeningTime = dto.OpeningTime;
+    room.ClosingTime = dto.ClosingTime;
+
+    var success = await _roomRepository.Update(room);
+
+    if (!success)
+    {
+        return StatusCode(500, "Could not update room.");
+    }
+
+    return NoContent();
+}
 
 }
