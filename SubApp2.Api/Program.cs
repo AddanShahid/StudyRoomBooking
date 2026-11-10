@@ -24,6 +24,9 @@ builder.Services.AddScoped<IParticipationRepository, ParticipationRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+builder.Services.AddProblemDetails();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactDev", policy =>
@@ -36,6 +39,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
