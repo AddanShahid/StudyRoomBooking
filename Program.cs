@@ -11,10 +11,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity: users are stored in the same database (no email confirmation for local testing)
+// AddRoles enables role-based authorization (Admin / Student)
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-}).AddEntityFrameworkStores<ApplicationDbContext>();
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Send users to our own login page when they must be logged in
 builder.Services.ConfigureApplicationCookie(options =>
@@ -32,6 +35,9 @@ var app = builder.Build();
 
 // Create or update the database and add example data if it is empty
 DbInit.Seed(app);
+
+// Create roles (Admin, Student) and test users
+await DbInit.SeedUsersAsync(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

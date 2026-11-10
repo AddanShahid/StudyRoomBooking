@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudyRoomBooking.Data;
 using StudyRoomBooking.Models;
@@ -117,6 +117,47 @@ namespace StudyRoomBooking.DAL
             }
 
             context.SaveChanges();
+    }    
+        // Creates the roles Admin and Student, and one test user for each role.
+        // Must run after Seed(), because the database tables must exist first.
+        public static async Task SeedUsersAsync(IApplicationBuilder app)
+        {
+            using var scope = app.ApplicationServices.CreateScope();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            foreach (var role in new[] { "Admin", "Student" })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+
+            await CreateUserAsync(userManager, "admin@oslomet.no", "Admin123!", "Admin");
+            await CreateUserAsync(userManager, "student@oslomet.no", "Student123!", "Student");
         }
+
+        // Creates a user with the given role, unless the user already exists.
+        private static async Task CreateUserAsync(
+            UserManager<IdentityUser> userManager,
+            string email,
+            string password,
+            string role)
+        {
+            if (await userManager.FindByEmailAsync(email) != null)
+            {
+                return;
+            }
+
+            var user = new IdentityUser { UserName = email, Email = email };
+            var result = await userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
+        }
+        
     }
 }
