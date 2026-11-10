@@ -16,17 +16,34 @@ public class RoomsController : ControllerBase
         _roomRepository = roomRepository;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms()
+    
+[HttpGet]
+public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
+    [FromQuery] int? minCapacity,
+    [FromQuery] string? location)
+{
+    var rooms = await _roomRepository.GetAll();
+
+    if (rooms == null)
     {
-        var rooms = await _roomRepository.GetAll();
+        return StatusCode(500, "Could not load rooms.");
+    }
 
-        if (rooms == null)
-        {
-            return StatusCode(500, "Could not load rooms.");
-        }
+    if (minCapacity.HasValue && minCapacity.Value < 1)
+    {
+        return BadRequest("Minimum capacity must be at least 1.");
+    }
 
-        var roomDtos = rooms.Select(room => new RoomDto
+    var locationFilter = location?.Trim();
+
+    var roomDtos = rooms
+        .Where(room =>
+            (!minCapacity.HasValue || room.Capacity >= minCapacity.Value) &&
+            (string.IsNullOrWhiteSpace(locationFilter) ||
+             room.Location.Contains(
+                 locationFilter,
+                 StringComparison.OrdinalIgnoreCase)))
+        .Select(room => new RoomDto
         {
             Id = room.Id,
             Name = room.Name,
@@ -37,11 +54,12 @@ public class RoomsController : ControllerBase
             HasScreen = room.HasScreen,
             OpeningTime = room.OpeningTime,
             ClosingTime = room.ClosingTime
-        }).ToList();
+        })
+        .ToList();
 
-        return Ok(roomDtos);
+    return Ok(roomDtos);
+}
 
-    }
     [HttpGet("{id:int}")]
     public async Task<ActionResult<RoomDto>> GetRoom(int id)
     {
@@ -128,69 +146,69 @@ public class RoomsController : ControllerBase
         );
     }
     [HttpPut("{id:int}")]
-public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
-{
-    var room = await _roomRepository.GetById(id);
-
-    if (room == null)
+    public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
     {
-        return NotFound($"Room with ID {id} was not found.");
-    }
+        var room = await _roomRepository.GetById(id);
 
-    if (dto.OpeningTime >= dto.ClosingTime)
+        if (room == null)
+        {
+            return NotFound($"Room with ID {id} was not found.");
+        }
+
+        if (dto.OpeningTime >= dto.ClosingTime)
+        {
+            return BadRequest("Opening time must be before closing time.");
+        }
+
+        var roomName = dto.Name.Trim();
+
+        if (roomName.Length < 2)
+        {
+            return BadRequest("Room name must be at least 2 characters long.");
+        }
+
+        if (await _roomRepository.NameExists(roomName, id))
+        {
+            return Conflict("A room with this name already exists.");
+        }
+
+        room.Name = roomName;
+        room.Location = dto.Location;
+        room.Capacity = dto.Capacity;
+        room.Description = dto.Description;
+        room.HasWhiteboard = dto.HasWhiteboard;
+        room.HasScreen = dto.HasScreen;
+        room.OpeningTime = dto.OpeningTime;
+        room.ClosingTime = dto.ClosingTime;
+
+        var success = await _roomRepository.Update(room);
+
+        if (!success)
+        {
+            return StatusCode(500, "Could not update room.");
+        }
+
+        return NoContent();
+    }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteRoom(int id)
     {
-        return BadRequest("Opening time must be before closing time.");
+        var room = await _roomRepository.GetById(id);
+
+        if (room == null)
+        {
+            return NotFound($"Room with ID {id} was not found.");
+        }
+
+        var success = await _roomRepository.Delete(id);
+
+        if (!success)
+        {
+            return StatusCode(500, "Could not delete room.");
+        }
+
+        return NoContent();
     }
-
-    var roomName = dto.Name.Trim();
-
-    if (roomName.Length < 2)
-    {
-        return BadRequest("Room name must be at least 2 characters long.");
-    }
-
-    if (await _roomRepository.NameExists(roomName, id))
-    {
-        return Conflict("A room with this name already exists.");
-    }
-
-    room.Name = roomName;
-    room.Location = dto.Location;
-    room.Capacity = dto.Capacity;
-    room.Description = dto.Description;
-    room.HasWhiteboard = dto.HasWhiteboard;
-    room.HasScreen = dto.HasScreen;
-    room.OpeningTime = dto.OpeningTime;
-    room.ClosingTime = dto.ClosingTime;
-
-    var success = await _roomRepository.Update(room);
-
-    if (!success)
-    {
-        return StatusCode(500, "Could not update room.");
-    }
-
-    return NoContent();
-}
-[HttpDelete("{id:int}")]
-public async Task<IActionResult> DeleteRoom(int id)
-{
-    var room = await _roomRepository.GetById(id);
-
-    if (room == null)
-    {
-        return NotFound($"Room with ID {id} was not found.");
-    }
-
-    var success = await _roomRepository.Delete(id);
-
-    if (!success)
-    {
-        return StatusCode(500, "Could not delete room.");
-    }
-
-    return NoContent();
-}
 
 
 }

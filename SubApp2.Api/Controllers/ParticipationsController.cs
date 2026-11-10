@@ -60,6 +60,26 @@ public class ParticipationsController : ControllerBase
 
         return Ok(participationDto);
     }
+    [HttpGet("booking/{bookingId:int}")]
+    public async Task<ActionResult<IEnumerable<ParticipationDto>>> GetByBookingId(int bookingId)
+    {
+        var participations = await _participationRepository.GetByBookingId(bookingId);
+
+        if (participations == null)
+        {
+            return StatusCode(500, "Could not load participations.");
+        }
+
+        var participationDtos = participations.Select(p => new ParticipationDto
+        {
+            Id = p.Id,
+            StudentName = p.StudentName,
+            BookingId = p.BookingId,
+            Message = p.Message
+        }).ToList();
+
+        return Ok(participationDtos);
+    }
     [HttpPost]
     public async Task<ActionResult<ParticipationDto>> CreateParticipation(
     CreateParticipationDto dto)
