@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudyRoomBooking.Data;
 using StudyRoomBooking.Models;
@@ -5,6 +6,8 @@ using StudyRoomBooking.ViewModels;
 
 namespace StudyRoomBooking.Controllers
 {
+    // Only admins can create, edit and delete equipment. Everyone can see the list.
+    [Authorize(Roles = "Admin")]
     public class EquipmentController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,6 +18,7 @@ namespace StudyRoomBooking.Controllers
         }
 
         // Viser alt utstyr
+        [AllowAnonymous]
         public IActionResult Index()
         {
             var equipment = _context.Equipments
