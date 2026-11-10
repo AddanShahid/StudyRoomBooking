@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using StudyRoomBooking.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -69,6 +70,7 @@ public class BookingsController : ControllerBase
 
         return Ok(bookingDto);
     }
+    [Authorize]
     [HttpPost]
 public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
 {
@@ -131,7 +133,7 @@ public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
         bookingDto
     );
 }
-
+[Authorize]
 [HttpPut("{id:int}")]
 public async Task<IActionResult> UpdateBooking(
     int id, CreateBookingDto dto)
@@ -184,6 +186,7 @@ public async Task<IActionResult> UpdateBooking(
     return NoContent();
 }
 
+[Authorize]
 [HttpDelete("{id:int}")]
 public async Task<IActionResult> DeleteBooking(int id)
 {

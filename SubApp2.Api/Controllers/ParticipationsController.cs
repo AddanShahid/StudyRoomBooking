@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using StudyRoomBooking.Models;
 using Microsoft.AspNetCore.Mvc;
 using StudyRoomBooking.DAL;
@@ -83,6 +84,7 @@ public class ParticipationsController : ControllerBase
 
         return Ok(participationDtos);
     }
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<ParticipationDto>> CreateParticipation(
     CreateParticipationDto dto)
@@ -166,6 +168,7 @@ public class ParticipationsController : ControllerBase
             participationDto
         );
     }
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteParticipation(int id)
     {

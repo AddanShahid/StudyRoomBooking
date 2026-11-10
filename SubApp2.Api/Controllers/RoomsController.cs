@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using StudyRoomBooking.Models;
 using Microsoft.AspNetCore.Mvc;
 using StudyRoomBooking.DAL;
@@ -85,6 +86,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
 
         return Ok(roomDto);
     }
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<RoomDto>> CreateRoom(CreateRoomDto dto)
     {
@@ -145,6 +147,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
             roomDto
         );
     }
+    [Authorize]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
     {
@@ -190,6 +193,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
 
         return NoContent();
     }
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteRoom(int id)
     {
