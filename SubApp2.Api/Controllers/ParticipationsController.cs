@@ -102,6 +102,13 @@ public class ParticipationsController : ControllerBase
         {
             return BadRequest("Student name must contain at least 2 characters.");
         }
+        if (string.Equals(
+    booking.StudentName?.Trim(),
+    participation.StudentName,
+    StringComparison.OrdinalIgnoreCase))
+{
+    return Conflict("The booking organizer is already registered.");
+}
 
         var existingParticipations =
             await _participationRepository.GetByBookingId(dto.BookingId);
