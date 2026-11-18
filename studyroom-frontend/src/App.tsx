@@ -1,43 +1,287 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
-const rooms = [
-  { id: 1, name: 'Study Room A101', capacity: 4, location: 'Building A' },
-  { id: 2, name: 'Study Room B205', capacity: 6, location: 'Building B' },
-  { id: 3, name: 'Study Room C302', capacity: 8, location: 'Building C' },
-]
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+type Room = {
+  id: number
+  name: string
+  location: string
+  capacity: number
+  description?: string
+  hasWhiteboard: boolean
+  hasScreen: boolean
+}
+
+type Booking = {
+  id: number
+  studentName: string
+  roomId: number
+  subject: string
+  topic: string | null
+  date: string
+  startTime: string
+  endTime: string
+}
+
+type BookingForm = {
+  studentName: string
+  roomId: number
+  subject: string
+  topic: string
+  date: string
+  startTime: string
+  endTime: string
+}
+
+const emptyForm: BookingForm = {
+  studentName: '',
+  roomId: 0,
+  subject: '',
+  topic: '',
+  date: '',
+  startTime: '',
+  endTime: ''
+}
 
 function App() {
+  const [rooms, setRooms] = useState<Room[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [search, setSearch] = useState('')
-  const [bookedRooms, setBookedRooms] = useState<number[]>([])
-  const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
+  const [token, setToken] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [form, setForm] = useState<BookingForm>(emptyForm)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function apiRequest(path: string, options: RequestInit = {}) {
+    const response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers
+      }
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Unauthorized. Please log in again.')
+      }
+      const detail = await response.text()
+      throw new Error(detail || `Request failed: ${response.status}`)
+    }
+
+    if (response.status === 204) return null
+    return response.json()
+  }
+
+  async function loadData() {
+    try {
+      setError('')
+      const [roomData, bookingData] = await Promise.all([
+        apiRequest('/api/rooms'),
+        apiRequest('/api/bookings')
+      ])
+      setRooms(roomData)
+      setBookings(bookingData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load data.')
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  async function login(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setMessage('')
+    setLoading(true)
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+
+      if (!response.ok) throw new Error('Invalid email or password.')
+
+      const data = await response.json()
+      setToken(data.token)
+      setPassword('')
+      setMessage('Successfully logged in!')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function startBooking(roomId: number) {
+    setForm({ ...emptyForm, roomId })
+    setEditingId(null)
+    setShowForm(true)
+    setError('')
+    setMessage('')
+  }
+
+  function startEditing(booking: Booking) {
+    setForm({
+      studentName: booking.studentName,
+      roomId: booking.roomId,
+      subject: booking.subject,
+      topic: booking.topic || '',
+      date: booking.date.slice(0, 10),
+      startTime: booking.startTime.slice(0, 5),
+      endTime: booking.endTime.slice(0, 5)
+    })
+    setEditingId(booking.id)
+    setShowForm(true)
+    setError('')
+    setMessage('')
+  }
+
+  async function saveBooking(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setMessage('')
+
+    if (!token) {
+      setError('Please log in before booking.')
+      return
+    }
+
+    if (form.endTime <= form.startTime) {
+      setError('End time must be after start time.')
+      return
+    }
+
+    const payload = {
+      studentName: form.studentName.trim(),
+      roomId: form.roomId,
+      subject: form.subject.trim(),
+      topic: form.topic.trim() || null,
+      date: `${form.date}T00:00:00`,
+      startTime: `${form.startTime}:00`,
+      endTime: `${form.endTime}:00`
+    }
+
+    setLoading(true)
+
+    try {
+      const editing = editingId !== null
+
+      await apiRequest(
+        editing ? `/api/bookings/${editingId}` : '/api/bookings',
+        {
+          method: editing ? 'PUT' : 'POST',
+          body: JSON.stringify(payload)
+        }
+      )
+
+      setShowForm(false)
+      setEditingId(null)
+      setForm(emptyForm)
+      await loadData()
+      setMessage(editing ? 'Booking updated!' : 'Booking created!')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save booking.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function deleteBooking(id: number) {
+    if (!token) {
+      setError('Please log in first.')
+      return
+    }
+
+    if (!window.confirm('Are you sure you want to cancel this booking?')) {
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      await apiRequest(`/api/bookings/${id}`, { method: 'DELETE' })
+      await loadData()
+      setMessage('Booking cancelled!')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not cancel booking.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredRooms = rooms.filter(room =>
-    room.name.toLowerCase().includes(search.toLowerCase())
+    `${room.name} ${room.location}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
   )
-
-  function toggleBooking(id: number) {
-    setBookedRooms(previous =>
-      previous.includes(id)
-        ? previous.filter(roomId => roomId !== id)
-        : [...previous, id]
-    )
-  }
 
   return (
     <main>
       <h1>StudyRoomBooking</h1>
       <p>Find and book a study room on campus.</p>
 
-      <input
-        type="text"
-        placeholder="Search for a study room..."
-        value={search}
-        onChange={event => setSearch(event.target.value)}
-      />
+      {error && <p role="alert" style={{ color: 'crimson' }}>{error}</p>}
+      {message && <p role="status">{message}</p>}
+
+      <section className="card">
+        {token ? (
+          <>
+            <p>Logged in as {email}</p>
+            <button onClick={() => {
+              setToken('')
+              setShowForm(false)
+              setMessage('Logged out.')
+            }}>
+              Log out
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>Student login</h2>
+            <form onSubmit={login}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              <button disabled={loading} type="submit">Log in</button>
+            </form>
+          </>
+        )}
+      </section>
 
       <h2>Available study rooms</h2>
+
+      <input
+        type="search"
+        placeholder="Search for a study room..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
 
       {filteredRooms.length === 0 && <p>No rooms found.</p>}
 
@@ -46,71 +290,147 @@ function App() {
           <h3>{room.name}</h3>
           <p>Location: {room.location}</p>
           <p>Capacity: {room.capacity} students</p>
-          {bookedRooms.includes(room.id) && (
-  <p>✅ This room is booked!</p>
-)}
-          <button onClick={() => {
-  if (bookedRooms.includes(room.id)) {
-    toggleBooking(room.id)
-  } else {
-    setSelectedRoom(room.id)
-  }
-}}>
-            {bookedRooms.includes(room.id) ? 'Cancel booking' : 'Book room'}
+          {room.description && <p>{room.description}</p>}
+          <p>Whiteboard: {room.hasWhiteboard ? 'Yes' : 'No'}</p>
+          <p>Screen: {room.hasScreen ? 'Yes' : 'No'}</p>
+          <button
+            disabled={!token}
+            onClick={() => startBooking(room.id)}
+          >
+            Book room
           </button>
         </div>
       ))}
-   {selectedRoom !== null && (
-  <div className="card">
-    <h2>Create Booking</h2>
 
-    <p>
-      Room: {rooms.find(room => room.id === selectedRoom)?.name}
-    </p>
+      {showForm && (
+        <section className="card">
+          <h2>{editingId !== null ? 'Edit Booking' : 'Create Booking'}</h2>
 
-    <form onSubmit={(event) => {
-      event.preventDefault()
-      toggleBooking(selectedRoom)
-      setSelectedRoom(null)
-    }}>
-      <input
-        type="text"
-        placeholder="Student name"
-        required
-      />
+          <form onSubmit={saveBooking}>
+            <label>
+              Room
+              <select
+                value={form.roomId}
+                onChange={e => setForm({
+                  ...form, roomId: Number(e.target.value)
+                })}
+                required
+              >
+                {rooms.map(room => (
+                  <option key={room.id} value={room.id}>
+                    {room.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      <input
-        type="text"
-        placeholder="Subject"
-        required
-      />
+            <input
+              placeholder="Student name"
+              value={form.studentName}
+              minLength={2}
+              maxLength={60}
+              onChange={e => setForm({
+                ...form, studentName: e.target.value
+              })}
+              required
+            />
 
-      <input
-        type="date"
-        required
-      />
+            <input
+              placeholder="Subject"
+              value={form.subject}
+              maxLength={100}
+              onChange={e => setForm({
+                ...form, subject: e.target.value
+              })}
+              required
+            />
 
-      <input
-        type="time"
-        required
-      />
+            <input
+              placeholder="Topic (optional)"
+              value={form.topic}
+              maxLength={200}
+              onChange={e => setForm({
+                ...form, topic: e.target.value
+              })}
+            />
 
-      <button type="submit">
-        Confirm Booking
-      </button>
+            <label>
+              Date
+              <input
+                type="date"
+                value={form.date}
+                onChange={e => setForm({
+                  ...form, date: e.target.value
+                })}
+                required
+              />
+            </label>
 
-      <button
-        type="button"
-        onClick={() => setSelectedRoom(null)}
-      >
-        Cancel
-      </button>
-    </form>
-  </div>
-)}
+            <label>
+              Start time
+              <input
+                type="time"
+                value={form.startTime}
+                onChange={e => setForm({
+                  ...form, startTime: e.target.value
+                })}
+                required
+              />
+            </label>
+
+            <label>
+              End time
+              <input
+                type="time"
+                value={form.endTime}
+                onChange={e => setForm({
+                  ...form, endTime: e.target.value
+                })}
+                required
+              />
+            </label>
+
+            <button type="submit" disabled={loading}>
+              {editingId !== null ? 'Save changes' : 'Confirm Booking'}
+            </button>
+
+            <button type="button" onClick={() => setShowForm(false)}>
+              Cancel
+            </button>
+          </form>
+        </section>
+      )}
+
+      <h2>Existing Bookings</h2>
+
+      {bookings.length === 0 && <p>No bookings found.</p>}
+
+      {bookings.map(booking => (
+        <div className="card" key={booking.id}>
+          <h3>{booking.subject}</h3>
+          <p>Student: {booking.studentName}</p>
+          <p>Room: {rooms.find(r => r.id === booking.roomId)?.name || booking.roomId}</p>
+          <p>Date: {booking.date.slice(0, 10)}</p>
+          <p>Time: {booking.startTime} – {booking.endTime}</p>
+          {booking.topic && <p>Topic: {booking.topic}</p>}
+
+          {token && (
+            <>
+              <button onClick={() => startEditing(booking)}>
+                Edit
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => deleteBooking(booking.id)}
+              >
+                Cancel booking
+              </button>
+            </>
+          )}
+        </div>
+      ))}
     </main>
   )
 }
 
 export default App
-  
