@@ -77,6 +77,27 @@ namespace StudyRoomBooking.DAL
             }
         }
 
+        public async Task<bool> Update(int id, string? message)
+        {
+            try
+            {
+                var participation = await _db.Participations.FindAsync(id);
+
+                if (participation == null)
+                    return false;
+
+                participation.Message = message;
+                await _db.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not update participation {Id}", id);
+                return false;
+            }
+        }
+
         public async Task<bool> Delete(int id)
         {
             try
