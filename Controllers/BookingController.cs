@@ -1,56 +1,100 @@
-using System;
-using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using StudyRoomBooking.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using StudyRoomBooking.DAL;
 using StudyRoomBooking.Models;
 
 namespace StudyRoomBooking.Controllers
 {
     public class BookingController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IBookingRepository _bookingRepository;
+        private readonly IRoomRepository _roomRepository;
         private readonly ILogger<BookingController> _logger;
 
         public BookingController(
-            ApplicationDbContext context,
+            IBookingRepository bookingRepository,
+            IRoomRepository roomRepository,
             ILogger<BookingController> logger)
         {
-            _context = context;
+            _bookingRepository = bookingRepository;
+            _roomRepository = roomRepository;
             _logger = logger;
         }
 
-
-        // Display all the bookings from the database
-        public async Task<IActionResult> Index()
+        // Show bookings and apply search filters
+        public async Task<IActionResult> Index(
+            string? subject,
+            DateTime? date,
+            int? roomId,
+            int? equipmentId)
         {
-            try
+            _logger.LogInformation("Henter bookinger.");
+
+            var bookings = await _bookingRepository.GetAll();
+
+            if (bookings == null)
             {
-
-                _logger.LogInformation("Henter alle bookinger.");
-
-                var bookings = await _context.Bookings.ToListAsync();
-
-                _logger.LogInformation(
-                    "Hentet {Count} bookinger.",
-                    bookings.Count);
-
-                return View(bookings);
+                return Problem("Kunne ikke hente bookinger.");
             }
-            catch (Exception ex)
+
+            var rooms = await _roomRepository.GetAll();
+
+            if (rooms == null)
             {
-
-                // Handle unexpected errors when reading from the database
-                _logger.LogError(
-                    ex,
-                    "Feil ved henting av bookinger.");
-
-                return Problem(
-                    "Det oppstod en feil ved henting av bookingene.");
+                return Problem("Kunne ikke hente rom.");
             }
+
+            ViewBag.Rooms = rooms.ToList();
+
+            ViewBag.Equipments = rooms
+                .SelectMany(r => r.Equipment)
+                .GroupBy(e => e.Id)
+                .Select(g => g.First())
+                .OrderBy(e => e.Name)
+                .ToList();
+
+            ViewBag.SelectedSubject = subject;
+            ViewBag.SelectedDate = date;
+            ViewBag.SelectedRoomId = roomId;
+            ViewBag.SelectedEquipmentId = equipmentId;
+
+            if (!string.IsNullOrWhiteSpace(subject))
+            {
+                bookings = bookings.Where(b =>
+                    b.Subject.Contains(
+                        subject.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (date.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.Date.Date == date.Value.Date);
+            }
+
+            if (roomId.HasValue)
+            {
+                bookings = bookings.Where(b =>
+                    b.RoomId == roomId.Value);
+            }
+
+            if (equipmentId.HasValue)
+            {
+                var matchingRoomIds = rooms
+                    .Where(r => r.Equipment.Any(e =>
+                        e.Id == equipmentId.Value))
+                    .Select(r => r.Id)
+                    .ToHashSet();
+
+                bookings = bookings.Where(b =>
+                    matchingRoomIds.Contains(b.RoomId));
+            }
+
+            return View(bookings.ToList());
         }
 
-        // Display the details of a specific booking
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -61,104 +105,111 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
-            try
+            var booking = await _bookingRepository.GetById(id.Value);
+
+            if (booking == null)
             {
-                _logger.LogInformation(
-                    "Henter booking med ID {BookingId}.",
-                    id);
+                _logger.LogWarning(
+                    "Fant ikke booking med ID {BookingId}.", id);
 
-                var booking = await _context.Bookings
-                    .FirstOrDefaultAsync(m => m.Id == id);
-
-                if (booking == null)
-                {
-                    _logger.LogWarning(
-                        "Fant ikke booking med ID {BookingId}.",
-                        id);
-
-                    return NotFound();
-                }
-
-                return View(booking);
+                return NotFound();
             }
-            catch (Exception ex)
-            {
 
-                // Handle unexpected errors when retrieving the booking
-                _logger.LogError(
-                    ex,
-                    "Feil ved henting av booking med ID {BookingId}.",
-                    id);
-
-                return Problem(
-                    "Det oppstod en feil ved henting av bookingen.");
-            }
+            return View(booking);
         }
 
-        public IActionResult Create()
+        // Display the booking form and search for available rooms
+        [Authorize]
+        public async Task<IActionResult> Create(
+            DateTime? date,
+            TimeOnly? startTime,
+            TimeOnly? endTime)
         {
-            _logger.LogInformation(
-                "Create-siden ble åpnet.");
+            _logger.LogInformation("Create-siden ble åpnet.");
 
-            return View();
+            ViewBag.SearchDate = date;
+            ViewBag.SearchStartTime = startTime;
+            ViewBag.SearchEndTime = endTime;
+
+            var booking = new Booking
+            {
+                Date = date ?? DateTime.Today,
+                StartTime = startTime ?? new TimeOnly(8, 0),
+                EndTime = endTime ?? new TimeOnly(9, 0)
+            };
+
+            ViewBag.Rooms = new List<Room>();
+
+            if (date.HasValue &&
+                startTime.HasValue &&
+                endTime.HasValue &&
+                startTime.Value < endTime.Value)
+            {
+                ViewBag.Rooms = await GetAvailableRooms(
+                    date.Value,
+                    startTime.Value,
+                    endTime.Value);
+            }
+
+            return View(booking);
         }
 
-
-        // Display the form for creating a new booking 
+        // Save a new booking
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("Id,StudentName,RoomName,Subject,Topic,Date,StartTime,EndTime")]
+            [Bind("StudentName,RoomId,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
+            await ValidateRoomAndOverlap(booking);
 
-            // Validate user input on the server before saving to the database
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
                     "Forsøk på å opprette booking med ugyldige data.");
 
+                ViewBag.SearchDate = booking.Date;
+                ViewBag.SearchStartTime = booking.StartTime;
+                ViewBag.SearchEndTime = booking.EndTime;
+
+                ViewBag.Rooms = await GetAvailableRooms(
+                    booking.Date,
+                    booking.StartTime,
+                    booking.EndTime);
+
                 return View(booking);
             }
 
-            try
+            if (!await _bookingRepository.Create(booking))
             {
-                _logger.LogInformation(
-                    "Oppretter booking for {StudentName} i {RoomName}.",
-                    booking.StudentName,
-                    booking.RoomName);
-
-
-                // Add the new booking to the database
-                _context.Add(booking);
-
-
-                // Save the changes to the database
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation(
-                    "Booking opprettet med ID {BookingId}.",
-                    booking.Id);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-
-                // Handle unexpected database errors
-                _logger.LogError(
-                    ex,
-                    "Feil ved oppretting av booking.");
-
                 ModelState.AddModelError(
                     "",
                     "Det oppstod en feil ved lagring av bookingen.");
 
+                ViewBag.SearchDate = booking.Date;
+                ViewBag.SearchStartTime = booking.StartTime;
+                ViewBag.SearchEndTime = booking.EndTime;
+
+                ViewBag.Rooms = await GetAvailableRooms(
+                    booking.Date,
+                    booking.StartTime,
+                    booking.EndTime);
+
                 return View(booking);
             }
+
+            _logger.LogInformation(
+                "Booking opprettet med ID {BookingId} for {StudentName} i rom {RoomId}.",
+                booking.Id,
+                booking.StudentName,
+                booking.RoomId);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // Display the form for editing an existing booking
+        // Display Edit form
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -169,112 +220,70 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
-            try
-            {
-                var booking = await _context.Bookings.FindAsync(id);
+            var booking = await _bookingRepository.GetById(id.Value);
 
-                if (booking == null)
-                {
-                    _logger.LogWarning(
-                        "Fant ikke booking {BookingId} for redigering.",
-                        id);
-
-                    return NotFound();
-                }
-
-                return View(booking);
-            }
-            catch (Exception ex)
-            {
-
-                //Handle unexpected errors when retrieving the booking 
-                _logger.LogError(
-                    ex,
-                    "Feil ved henting av booking {BookingId}.",
-                    id);
-
-                return Problem(
-                    "Det oppstod en feil ved henting av bookingen.");
-            }
-        }
-
-        //Update the booking after validating the submitted form
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            int id,
-            [Bind("Id,StudentName,RoomName,Subject,Topic,Date,StartTime,EndTime")]
-            Booking booking)
-        {
-
-            //Check if the booking ID in the URL matches the booking ID in the form data
-            if (id != booking.Id)
+            if (booking == null)
             {
                 _logger.LogWarning(
-                    "Booking-ID stemmer ikke.");
+                    "Fant ikke booking {BookingId} for redigering.", id);
 
                 return NotFound();
             }
 
-// Validate user input on the server before updating the booking in the database
+            await LoadRoomOptions(booking.RoomId);
+
+            return View(booking);
+        }
+
+        // Update booking
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,StudentName,RoomId,Subject,Topic,Date,StartTime,EndTime")]
+            Booking booking)
+        {
+            if (id != booking.Id)
+            {
+                _logger.LogWarning("Booking-ID stemmer ikke.");
+
+                return NotFound();
+            }
+
+            await ValidateRoomAndOverlap(booking);
+
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning(
                     "Ugyldige data ved redigering av booking {BookingId}.",
                     id);
 
+                await LoadRoomOptions(booking.RoomId);
+
                 return View(booking);
             }
 
-            try
+            if (!await _bookingRepository.Update(booking))
             {
-                //Mark the booking entity as modified 
-                _context.Update(booking);
-
-                
-                // Save updated booking to the database
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation(
-                    "Booking {BookingId} ble oppdatert.",
-                    booking.Id);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-
-                //Handle conflicts when the booking has been modified or deleted by another request
-                _logger.LogError(
-                    ex,
-                    "Concurrency-feil ved booking {BookingId}.",
-                    booking.Id);
-
-                if (!BookingExists(booking.Id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-
-                //Handle unexpected errors and log them
-                _logger.LogError(
-                    ex,
-                    "Feil ved oppdatering av booking {BookingId}.",
-                    booking.Id);
-
                 ModelState.AddModelError(
                     "",
                     "Det oppstod en feil ved oppdatering av bookingen.");
 
+                await LoadRoomOptions(booking.RoomId);
+
                 return View(booking);
             }
+
+            _logger.LogInformation(
+                "Booking {BookingId} ble oppdatert.",
+                booking.Id);
+
+            return RedirectToAction(nameof(Index));
         }
 
-// Display the delete confirmation page for a booking
+        // Display Delete confirmation
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -285,92 +294,124 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
             }
 
-            try
+            var booking = await _bookingRepository.GetById(id.Value);
+
+            if (booking == null)
             {
-                var booking = await _context.Bookings
-                    .FirstOrDefaultAsync(m => m.Id == id);
-
-                if (booking == null)
-                {
-                    _logger.LogWarning(
-                        "Fant ikke booking {BookingId} for sletting.",
-                        id);
-
-                    return NotFound();
-                }
-
-                return View(booking);
-            }
-            catch (Exception ex)
-            {
-
-                //Handle the error and log it
-                _logger.LogError(
-                    ex,
-                    "Feil ved henting av booking {BookingId}.",
+                _logger.LogWarning(
+                    "Fant ikke booking {BookingId} for sletting.",
                     id);
 
-                return Problem(
-                    "Det oppstod en feil ved henting av bookingen.");
+                return NotFound();
             }
+
+            return View(booking);
         }
 
-
-// DeleteConfirmed action method to handle the deletion of a booking
+        // Delete booking
+        [Authorize]
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        
-        
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            _logger.LogInformation(
+                "Forsøker å slette booking {BookingId}.",
+                id);
+
+            if (!await _bookingRepository.Delete(id))
             {
-                _logger.LogInformation(
-                    "Forsøker å slette booking {BookingId}.",
-                    id);
-
-                var booking = await _context.Bookings.FindAsync(id);
-
-                if (booking == null)
-                {
-                    _logger.LogWarning(
-                        "Fant ikke booking {BookingId}.",
-                        id);
-
-                    return NotFound();
-                }
-
-                // Remove the booking from the database
-                _context.Bookings.Remove(booking);
-
-
-         // Save changes to the database
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation(
-                    "Booking {BookingId} ble slettet.",
-                    id);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                // Log the error and return a problem response
-                _logger.LogError(
-                    ex,
-                    "Feil ved sletting av booking {BookingId}.",
-                    id);
-
                 return Problem(
                     "Det oppstod en feil ved sletting av bookingen.");
             }
+
+            _logger.LogInformation(
+                "Booking {BookingId} ble slettet.",
+                id);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // Private helper method to check if a booking exists        
-        private bool BookingExists(int id)
+        // Validate room and overlapping bookings
+        private async Task ValidateRoomAndOverlap(Booking booking)
         {
-            return _context.Bookings.Any(e => e.Id == id);
+            if (!ModelState.IsValid)
+            {
+                return;
+            }
+
+            if (await _roomRepository.GetById(booking.RoomId) == null)
+            {
+                ModelState.AddModelError(
+                    nameof(Booking.RoomId),
+                    "The chosen room does not exist.");
+
+                return;
+            }
+
+            var overlap = await _bookingRepository.FindOverlap(booking);
+
+            if (overlap != null)
+            {
+                _logger.LogWarning(
+                    "Rom {RoomId} er allerede booket {Date:d} {Start}-{End}.",
+                    booking.RoomId,
+                    booking.Date,
+                    overlap.StartTime,
+                    overlap.EndTime);
+
+                ModelState.AddModelError(
+                    nameof(Booking.StartTime),
+                    $"The room is already booked from {overlap.StartTime:HH:mm} to {overlap.EndTime:HH:mm} on this day.");
+            }
+        }
+
+        // Find available rooms
+        private async Task<List<Room>> GetAvailableRooms(
+            DateTime date,
+            TimeOnly startTime,
+            TimeOnly endTime)
+        {
+            var rooms = await _roomRepository.GetAll();
+            var bookings = await _bookingRepository.GetAll();
+
+            if (rooms == null || bookings == null)
+            {
+                _logger.LogError(
+                    "Could not retrieve rooms or bookings when searching for available rooms.");
+
+                return new List<Room>();
+            }
+
+            var bookedRoomIds = bookings
+                .Where(b =>
+                    b.Date.Date == date.Date &&
+                    b.StartTime < endTime &&
+                    startTime < b.EndTime)
+                .Select(b => b.RoomId)
+                .ToHashSet();
+
+            return rooms
+                .Where(room => !bookedRoomIds.Contains(room.Id))
+                .ToList();
+        }
+
+        // Fill room dropdown
+        private async Task LoadRoomOptions(
+            int? selectedRoomId = null)
+        {
+            var rooms = await _roomRepository.GetAll()
+                ?? Enumerable.Empty<Room>();
+
+            ViewData["RoomId"] = new SelectList(
+                rooms.Select(r => new
+                {
+                    r.Id,
+                    Label = $"{r.Name} ({r.Location}, {r.Capacity} seats)"
+                }),
+                "Id",
+                "Label",
+                selectedRoomId);
         }
     }
 }

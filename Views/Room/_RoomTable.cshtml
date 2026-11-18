@@ -1,0 +1,105 @@
+
+@model IEnumerable<StudyRoomBooking.ViewModels.RoomViewModel>
+
+@{
+    var bookedRooms = ViewBag.BookedRooms as List<string> ?? new List<string>();
+
+    bool hasTimeFilter =
+        ViewBag.SelectedDate != null &&
+        ViewBag.SelectedStartTime != null &&
+        ViewBag.SelectedEndTime != null;
+}
+
+<div class="table-responsive">
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Lokasjon</th>
+                <th>Kapasitet</th>
+                <th>Utstyr</th>
+                <th>Beskrivelse</th>
+                <th>Åpningstid</th>
+                <th>Tilgjengelighet</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var room in Model)
+            {
+                <tr>
+                    <td>@room.Name</td>
+                    <td>@room.Location</td>
+                    <td>@room.Capacity</td>
+
+                    <td>
+                        @if (room.Equipments != null && room.Equipments.Any())
+                        {
+                            @foreach (var equipment in room.Equipments)
+                            {
+                                <span>@equipment.Name</span><br />
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Ikke registrert</span>
+                        }
+                    </td>
+
+                    <td>@room.Description</td>
+
+                    <td>
+                        @room.OpeningTime.ToString("HH:mm") -
+                        @room.ClosingTime.ToString("HH:mm")
+                    </td>
+
+                    <td>
+                        @if (hasTimeFilter)
+                        {
+                            var start = (TimeOnly)ViewBag.SelectedStartTime;
+                            var end = (TimeOnly)ViewBag.SelectedEndTime;
+
+                            if (start >= end)
+                            {
+                                <span class="text-danger">Ugyldig tidspunkt</span>
+                            }
+                            else if (start < room.OpeningTime || end > room.ClosingTime)
+                            {
+                                <span class="text-muted">Stengt</span>
+                            }
+                            else if (bookedRooms.Contains(room.Name))
+                            {
+                                <span class="text-danger">Opptatt</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">Ledig</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-success">Velg tidspunkt</span>
+                        }
+                    </td>
+
+                    <td>
+                        <a asp-controller="Room"
+                           asp-action="Edit"
+                           asp-route-id="@room.Id"
+                           class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Room"
+                           asp-action="Delete"
+                           asp-route-id="@room.Id"
+                           class="btn btn-sm btn-danger">
+                            Slett
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

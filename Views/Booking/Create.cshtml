@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Create Booking";
+    var rooms = ViewBag.Rooms as List<StudyRoomBooking.Models.Room>
+                ?? new List<StudyRoomBooking.Models.Room>();
 }
 
 <h1>Create Booking</h1>
@@ -11,59 +13,123 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="StudentName" class="control-label">Student Name</label>
-                <input asp-for="StudentName" class="form-control" />
-                <span asp-validation-for="StudentName" class="text-danger"></span>
+        <h4>1. Finn ledige rom</h4>
+
+        <form asp-action="Create" method="get">
+            <div class="mb-3">
+                <label class="form-label">Dato</label>
+                <input type="date" name="date" class="form-control"
+                       value="@(ViewBag.SearchDate == null ? "" : ((DateTime)ViewBag.SearchDate).ToString("yyyy-MM-dd"))"
+                       required />
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="RoomName" class="control-label">Room</label>
-                <input asp-for="RoomName" class="form-control" placeholder="e.g. Room 101" />
-                <span asp-validation-for="RoomName" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label">Fra klokkeslett</label>
+                <input type="time" name="startTime" class="form-control"
+                       value="@(ViewBag.SearchStartTime == null ? "" : ((TimeOnly)ViewBag.SearchStartTime).ToString("HH:mm"))"
+                       required />
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Subject" class="control-label">Subject</label>
-                <input asp-for="Subject" class="form-control" placeholder="e.g. Web Applications" />
-                <span asp-validation-for="Subject" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label">Til klokkeslett</label>
+                <input type="time" name="endTime" class="form-control"
+                       value="@(ViewBag.SearchEndTime == null ? "" : ((TimeOnly)ViewBag.SearchEndTime).ToString("HH:mm"))"
+                       required />
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Topic" class="control-label">Topic (optional)</label>
-                <input asp-for="Topic" class="form-control" placeholder="What will you work on?" />
-                <span asp-validation-for="Topic" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Date" class="control-label">Date</label>
-                <input asp-for="Date" type="date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="StartTime" class="control-label">Start Time</label>
-                <input asp-for="StartTime" type="time" class="form-control" />
-                <span asp-validation-for="StartTime" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="EndTime" class="control-label">End Time</label>
-                <input asp-for="EndTime" type="time" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Create Booking" class="booking-create-button" />
-                <a asp-action="Index" class="booking-back-button">Back to Bookings</a>
-            </div>
+            <button type="submit" class="btn btn-primary">
+                Finn ledige rom
+            </button>
         </form>
+
+        <hr />
+
+        @if (ViewBag.SearchDate != null &&
+             ViewBag.SearchStartTime != null &&
+             ViewBag.SearchEndTime != null)
+        {
+            <h4>2. Opprett booking</h4>
+
+            @if (rooms.Any())
+            {
+                <form asp-action="Create" method="post">
+
+                    <div asp-validation-summary="All"
+                         class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="StudentName">Studentnavn</label>
+                        <input asp-for="StudentName" class="form-control" />
+                        <span asp-validation-for="StudentName"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RoomId">Velg rom</label>
+                        <select asp-for="RoomId" class="form-select">
+                            <option value="">Velg et rom</option>
+                            @foreach (var room in rooms)
+                            {
+                                <option value="@room.Id">
+                                    @room.Name (Kapasitet: @room.Capacity)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="RoomId"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Subject">Fag</label>
+                        <input asp-for="Subject" class="form-control" />
+                        <span asp-validation-for="Subject"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Topic">Tema (valgfritt)</label>
+                        <input asp-for="Topic" class="form-control" />
+                    </div>
+
+                    <input type="hidden" asp-for="Date"
+                           value="@Model.Date.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" asp-for="StartTime"
+                           value="@Model.StartTime.ToString("HH:mm")" />
+                    <input type="hidden" asp-for="EndTime"
+                           value="@Model.EndTime.ToString("HH:mm")" />
+
+                    <p>
+                        <strong>Dato:</strong>
+                        @Model.Date.ToString("dd.MM.yyyy")
+                        <br />
+                        <strong>Tid:</strong>
+                        @Model.StartTime.ToString("HH:mm") -
+                        @Model.EndTime.ToString("HH:mm")
+                    </p>
+
+                    <button type="submit" class="btn btn-success">
+                        Opprett booking
+                    </button>
+                </form>
+            }
+            else
+            {
+                <p class="text-danger">
+                    Ingen ledige rom på valgt tidspunkt.
+                </p>
+            }
+        }
+
+        <a asp-action="Index" class="btn btn-secondary mt-3">
+            Tilbake til bookinger
+        </a>
+
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

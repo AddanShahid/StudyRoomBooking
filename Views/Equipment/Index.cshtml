@@ -1,0 +1,16 @@
+
+@model IEnumerable<StudyRoomBooking.ViewModels.EquipmentViewModel>
+
+@{
+    ViewData["Title"] = "Equipment";
+}
+
+<h1>Utstyrsoversikt</h1>
+
+<a asp-controller="Equipment"
+   asp-action="Create"
+   class="btn btn-primary">
+    Legg til utstyr
+</a>
+
+<partial name="_EquipmentTable" model="Model" />

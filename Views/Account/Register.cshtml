@@ -1,0 +1,54 @@
+@model StudyRoomBooking.ViewModels.RegisterViewModel
+
+<h2>Register</h2>
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+                <div class="form-text">
+                    At least 6 characters, with an uppercase letter, a lowercase letter, a number and a special character (e.g. !).
+                </div>
+            </div>
+
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="showPassword" />
+                <label class="form-check-label" for="showPassword">Show password</label>
+                
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show or hide the password fields when the checkbox is clicked
+        document.getElementById("showPassword").addEventListener("change", function () {
+            const type = this.checked ? "text" : "password";
+            ["Password", "ConfirmPassword"].forEach(function (id) {
+                const field = document.getElementById(id);
+                if (field) field.type = type;
+            });
+        });
+    </script>
+}
