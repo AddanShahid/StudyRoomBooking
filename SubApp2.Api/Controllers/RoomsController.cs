@@ -86,7 +86,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
 
         return Ok(roomDto);
     }
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<RoomDto>> CreateRoom(CreateRoomDto dto)
     {
@@ -147,7 +147,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
             roomDto
         );
     }
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateRoom(int id, CreateRoomDto dto)
     {
@@ -193,7 +193,7 @@ public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms(
 
         return NoContent();
     }
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteRoom(int id)
     {

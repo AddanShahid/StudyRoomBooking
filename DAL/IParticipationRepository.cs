@@ -8,6 +8,7 @@ namespace StudyRoomBooking.DAL
         Task<Participation?> GetById(int id);
         Task<IEnumerable<Participation>?> GetByBookingId(int bookingId);
         Task<bool> Create(Participation participation);
+        Task<bool> Update(int id, string? message);
         Task<bool> Delete(int id);
     }
 }

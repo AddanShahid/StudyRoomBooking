@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using StudyRoomBooking.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -97,9 +98,14 @@ public class ParticipationsController : ControllerBase
         }
 
 
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email) || email.Length > 60)
+            return Forbid();
+
         var participation = new Participation
         {
-            StudentName = dto.StudentName.Trim(),
+            StudentName = email,
             BookingId = dto.BookingId,
             Message = dto.Message?.Trim()
         };
@@ -169,6 +175,35 @@ public class ParticipationsController : ControllerBase
         );
     }
     [Authorize]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateParticipation(
+        int id, UpdateParticipationDto dto)
+    {
+        var participation = await _participationRepository.GetById(id);
+
+        if (participation == null)
+            return NotFound();
+
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (!User.IsInRole("Admin") &&
+            (string.IsNullOrWhiteSpace(email) ||
+             !string.Equals(participation.StudentName, email,
+                 StringComparison.OrdinalIgnoreCase)))
+            return Forbid();
+
+        var success = await _participationRepository.Update(
+            id, dto.Message?.Trim());
+
+        if (!success)
+            return StatusCode(500, "Could not update participation.");
+
+        _logger.LogInformation("Participation {Id} updated", id);
+
+        return NoContent();
+    }
+
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteParticipation(int id)
     {
@@ -179,6 +214,13 @@ public class ParticipationsController : ControllerBase
             return NotFound($"Participation with ID {id} was not found.");
         }
 
+
+        if (!User.IsInRole("Admin") &&
+            !string.Equals(
+                participation.StudentName,
+                User.FindFirstValue(ClaimTypes.Email),
+                StringComparison.OrdinalIgnoreCase))
+            return Forbid();
 
         var success = await _participationRepository.Delete(id);
 

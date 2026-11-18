@@ -45,12 +45,17 @@ public class AuthController : ControllerBase
         var key = new SymmetricSecurityKey(
             Convert.FromHexString(jwtKey));
 
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
+var roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+claims.AddRange(roles.Select(role =>
+    new Claim(ClaimTypes.Role, role)));
 
         var token = new JwtSecurityToken(
             issuer: "StudyRoomBooking.Api",
