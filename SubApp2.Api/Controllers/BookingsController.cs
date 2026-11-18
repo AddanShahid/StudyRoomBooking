@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using StudyRoomBooking.Models;
@@ -74,9 +75,14 @@ public class BookingsController : ControllerBase
     [HttpPost]
 public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
 {
-    var booking = new Booking
+    var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email) || email.Length > 60)
+            return Forbid();
+
+        var booking = new Booking
     {
-        StudentName = dto.StudentName.Trim(),
+        StudentName = email,
         RoomId = dto.RoomId,
         Subject = dto.Subject.Trim(),
         Topic = dto.Topic,
@@ -145,8 +151,15 @@ public async Task<IActionResult> UpdateBooking(
         return NotFound($"Booking with ID {id} was not found.");
     }
 
-    booking.StudentName = dto.StudentName.Trim();
-    booking.RoomId = dto.RoomId;
+    
+    if (!User.IsInRole("Admin") &&
+            !string.Equals(
+                booking.StudentName,
+                User.FindFirstValue(ClaimTypes.Email),
+                StringComparison.OrdinalIgnoreCase))
+            return Forbid();
+
+        booking.RoomId = dto.RoomId;
     booking.Subject = dto.Subject.Trim();
     booking.Topic = dto.Topic;
     booking.Date = dto.Date.Date;
@@ -197,7 +210,14 @@ public async Task<IActionResult> DeleteBooking(int id)
         return NotFound($"Booking with ID {id} was not found.");
     }
 
-    var success = await _bookingRepository.Delete(id);
+    if (!User.IsInRole("Admin") &&
+            !string.Equals(
+                booking.StudentName,
+                User.FindFirstValue(ClaimTypes.Email),
+                StringComparison.OrdinalIgnoreCase))
+            return Forbid();
+
+        var success = await _bookingRepository.Delete(id);
 
     if (!success)
     {

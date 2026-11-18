@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using StudyRoomBooking.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -97,9 +98,14 @@ public class ParticipationsController : ControllerBase
         }
 
 
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email) || email.Length > 60)
+            return Forbid();
+
         var participation = new Participation
         {
-            StudentName = dto.StudentName.Trim(),
+            StudentName = email,
             BookingId = dto.BookingId,
             Message = dto.Message?.Trim()
         };
@@ -179,6 +185,13 @@ public class ParticipationsController : ControllerBase
             return NotFound($"Participation with ID {id} was not found.");
         }
 
+
+        if (!User.IsInRole("Admin") &&
+            !string.Equals(
+                participation.StudentName,
+                User.FindFirstValue(ClaimTypes.Email),
+                StringComparison.OrdinalIgnoreCase))
+            return Forbid();
 
         var success = await _participationRepository.Delete(id);
 
