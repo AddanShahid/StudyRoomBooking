@@ -24,13 +24,47 @@ public class BookingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
+    public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings(
+        string? subject,
+        DateTime? date,
+        int? roomId,
+        int? equipmentId)
     {
         var bookings = await _bookingRepository.GetAll();
 
         if (bookings == null)
         {
             return StatusCode(500, "Could not load bookings.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(subject))
+            bookings = bookings.Where(b =>
+                b.Subject.Contains(subject.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+        if (date.HasValue)
+            bookings = bookings.Where(b =>
+                b.Date.Date == date.Value.Date);
+
+        if (roomId.HasValue)
+            bookings = bookings.Where(b =>
+                b.RoomId == roomId.Value);
+
+        if (equipmentId.HasValue)
+        {
+            var rooms = await _roomRepository.GetAll();
+
+            if (rooms == null)
+                return StatusCode(500, "Could not load rooms.");
+
+            var matchingIds = rooms
+                .Where(r => r.Equipment.Any(e =>
+                    e.Id == equipmentId.Value))
+                .Select(r => r.Id)
+                .ToHashSet();
+
+            bookings = bookings.Where(b =>
+                matchingIds.Contains(b.RoomId));
         }
 
         var bookingDtos = bookings.Select(booking => new BookingDto
