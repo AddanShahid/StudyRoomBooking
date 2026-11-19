@@ -256,7 +256,7 @@ namespace StudyRoomBooking.Controllers
         {
             if (id != booking.Id)
 
-            
+
             {
                 _logger.LogWarning("Booking-ID stemmer ikke.");
 
@@ -365,7 +365,7 @@ namespace StudyRoomBooking.Controllers
                 _logger.LogWarning("{User} prøvde å slette booking {BookingId} uten tilgang.", User.Identity?.Name, id);
                 return Forbid();
             }
-            
+
 
             if (!await _bookingRepository.Delete(id))
             {
