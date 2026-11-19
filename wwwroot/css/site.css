@@ -88,8 +88,8 @@ body {
 }
 
 .booking-delete-button {
-    color: #940e0e;
-    border: 1px solid #940e0e;
+    color: #b42318;
+    border: 1px solid #b42318;
 }
 
 .booking-edit-button:hover {
@@ -103,7 +103,7 @@ body {
 }
 
 .booking-delete-button:hover {
-    background-color: #940e0e;
+    background-color: #b42318;
     color: white;
 }
 
@@ -129,7 +129,7 @@ body {
 :root {
     --primary: #9f558f;
     --primary-hover: #843c78;
-    --background: #f7f4f7;
+    --background: #fafafa;
 }
 
 body.bg-light {
@@ -148,4 +148,48 @@ body.bg-light {
 .booking-create-button:hover,
 .booking-back-button:hover {
     background-color: var(--primary-hover);
+}
+
+body.bg-light {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-bottom: 0;
+}
+
+body > .container {
+    flex: 1;
+}
+
+body > footer {
+    background-color: var(--background) !important;
+}
+
+.table {
+    --bs-table-bg: #ffffff;
+    --bs-table-striped-bg: #ffffff;
+    --bs-table-hover-bg: #f5f5f5;
+}
+
+.table thead {
+    --bs-table-bg: #f0eef1;
+    --bs-table-color: #242424;
+}
+
+.btn.btn-warning {
+    --bs-btn-color: #843c78;
+    --bs-btn-bg: #f3e9f1;
+    --bs-btn-border-color: #f3e9f1;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #843c78;
+    --bs-btn-hover-border-color: #843c78;
+}
+
+.btn.btn-danger {
+    --bs-btn-color: #b42318;
+    --bs-btn-bg: #ffffff;
+    --bs-btn-border-color: #b42318;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #b42318;
+    --bs-btn-hover-border-color: #b42318;
 }
