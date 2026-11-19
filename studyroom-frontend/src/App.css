@@ -68,3 +68,22 @@ main > input {
   border: 1px solid #cccccc;
   font-size: 16px;
 }
+
+#root button {
+    background-color: #9f558f;
+    color: white;
+}
+
+#root button:hover {
+    background-color: #843c78;
+    border-color: transparent;
+}
+
+#root button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.card h3 {
+    color: #843c78;
+}
