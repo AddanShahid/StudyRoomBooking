@@ -30,6 +30,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IParticipationRepository, ParticipationRepository>();
+builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 
 var app = builder.Build();
 

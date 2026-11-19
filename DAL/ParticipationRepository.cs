@@ -62,20 +62,27 @@ namespace StudyRoomBooking.DAL
             }
         }
 
-        public async Task<bool> Create(Participation participation)
-        {
-            try
-            {
-                _db.Participations.Add(participation);
-                await _db.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "[ParticipationRepository] Create() failed");
-                return false;
-            }
-        }
+public async Task<bool> Create(Participation participation)
+{
+    if (participation == null)
+    {
+        _logger.LogWarning("[ParticipationRepository] Create(): participation is null");
+        return false;
+    }
+
+    try
+    {
+        _db.Participations.Add(participation);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+    catch (Exception e)
+    {
+        _logger.LogError(e, "[ParticipationRepository] Create() failed");
+        return false;
+    }
+}
+
 
         public async Task<bool> Update(int id, string? message)
         {

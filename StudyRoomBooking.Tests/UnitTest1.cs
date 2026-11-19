@@ -277,5 +277,19 @@ namespace StudyRoomBooking.Tests
 
             Assert.False(result);
         }
+
+        // TEST 13: Update skal returnere false når deltakelsen ikke finnes.
+[Fact]
+public async Task Update_ReturnsFalseWhenParticipationDoesNotExist()
+{
+    using var context = CreateContext();
+
+    var repository = new ParticipationRepository(
+        context, CreateLogger().Object);
+
+    var result = await repository.Update(999, "Updated message");
+
+    Assert.False(result);
+}
     }
 }
