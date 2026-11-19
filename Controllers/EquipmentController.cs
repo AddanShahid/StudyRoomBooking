@@ -11,10 +11,12 @@ namespace StudyRoomBooking.Controllers
     public class EquipmentController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<EquipmentController> _logger;
 
-        public EquipmentController(ApplicationDbContext context)
+        public EquipmentController(ApplicationDbContext context, ILogger<EquipmentController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // Viser alt utstyr
@@ -30,6 +32,7 @@ namespace StudyRoomBooking.Controllers
                 })
                 .ToList();
 
+            _logger.LogInformation("[EquipmentController] Henter alt utstyr");
             return View(equipment);
         }
 
@@ -45,11 +48,15 @@ namespace StudyRoomBooking.Controllers
         public IActionResult Create(Equipment equipment)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("[EquipmentController] Ugyldige data ved oppretting av utstyr");
                 return View(equipment);
+            }
 
             _context.Equipments.Add(equipment);
             _context.SaveChanges();
 
+            _logger.LogInformation("[EquipmentController] Utstyr {Name} opprettet", equipment.Name);
             return RedirectToAction(nameof(Index));
         }
 
@@ -60,7 +67,10 @@ namespace StudyRoomBooking.Controllers
             var equipment = _context.Equipments.Find(id);
 
             if (equipment == null)
+            {
+                _logger.LogWarning("[EquipmentController] Fant ikke utstyr {Id}", id);
                 return NotFound();
+            }
 
             return View(equipment);
         }
@@ -73,11 +83,15 @@ namespace StudyRoomBooking.Controllers
                 return NotFound();
 
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("[EquipmentController] Ugyldige data ved redigering av utstyr {Id}", id);
                 return View(equipment);
+            }
 
             _context.Equipments.Update(equipment);
             _context.SaveChanges();
 
+            _logger.LogInformation("[EquipmentController] Utstyr {Id} oppdatert", id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -88,8 +102,10 @@ namespace StudyRoomBooking.Controllers
             var equipment = _context.Equipments.Find(id);
 
             if (equipment == null)
+            {
+                _logger.LogWarning("[EquipmentController] Fant ikke utstyr {Id}", id);
                 return NotFound();
-
+            }
             return View(equipment);
         }
 
@@ -100,11 +116,14 @@ namespace StudyRoomBooking.Controllers
             var equipment = _context.Equipments.Find(id);
 
             if (equipment == null)
+            {
+                _logger.LogWarning("[EquipmentController] Fant ikke utstyr {Id} for sletting", id);
                 return NotFound();
+            }
 
             _context.Equipments.Remove(equipment);
             _context.SaveChanges();
-
+            _logger.LogInformation("[EquipmentController] Utstyr {Id} slettet", id);
             return RedirectToAction(nameof(Index));
         }
     }

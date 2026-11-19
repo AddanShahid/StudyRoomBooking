@@ -100,4 +100,15 @@ public class AccountController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
+        
+     // GET: /Account/AccessDenied
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        _logger.LogWarning("[AccountController] {User} fikk ikke tilgang til {Path}",
+            User.Identity?.Name, HttpContext.Request.Query["ReturnUrl"].ToString());
+        return View();
+    }
 }
+
+    

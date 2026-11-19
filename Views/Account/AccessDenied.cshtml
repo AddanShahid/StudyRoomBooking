@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Access denied";
+}
+
+<div class="alert alert-danger mt-4">
+    <h1 class="h4">Access denied</h1>
+    <p class="mb-0">
+        You do not have permission to view this page.
+        Only the owner of a booking or an administrator can change it.
+    </p>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+    Back to home page
+</a>

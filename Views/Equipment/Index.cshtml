@@ -6,11 +6,13 @@
 }
 
 <h1>Utstyrsoversikt</h1>
-
+@if (User.IsInRole("Admin"))
+{
 <a asp-controller="Equipment"
    asp-action="Create"
    class="btn btn-primary">
     Legg til utstyr
 </a>
+}
 
 <partial name="_EquipmentTable" model="Model" />

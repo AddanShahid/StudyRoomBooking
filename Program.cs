@@ -24,7 +24,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
 });
 // Repositories (DAL) used by the controllers instead of the DbContext directly
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
