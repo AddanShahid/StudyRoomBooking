@@ -162,6 +162,9 @@ namespace StudyRoomBooking.Controllers
             [Bind("StudentName,RoomId,Subject,Topic,Date,StartTime,EndTime")]
             Booking booking)
         {
+            // The logged-in user owns the booking
+            booking.StudentName = User.Identity!.Name!;
+            ModelState.Remove(nameof(Booking.StudentName));
             await ValidateRoomAndOverlap(booking);
 
             if (!ModelState.IsValid)
@@ -229,6 +232,13 @@ namespace StudyRoomBooking.Controllers
 
                 return NotFound();
             }
+            
+            if (!CanModify(booking))
+            {
+                _logger.LogWarning("{User} prøvde å redigere booking {BookingId} uten tilgang.", User.Identity?.Name, id);
+                return Forbid();
+            }
+
 
             await LoadRoomOptions(booking.RoomId);
 
@@ -245,11 +255,30 @@ namespace StudyRoomBooking.Controllers
             Booking booking)
         {
             if (id != booking.Id)
+
+            
             {
                 _logger.LogWarning("Booking-ID stemmer ikke.");
 
                 return NotFound();
             }
+
+            var existing = await _bookingRepository.GetById(id);
+            if (existing == null)
+            {
+                return NotFound();
+            }
+
+            if (!CanModify(existing))
+            {
+                _logger.LogWarning("{User} prøvde å redigere booking {BookingId} uten tilgang.", User.Identity?.Name, id);
+                return Forbid();
+            }
+
+            // The owner cannot be changed
+            booking.StudentName = existing.StudentName;
+            ModelState.Remove(nameof(Booking.StudentName));
+
 
             await ValidateRoomAndOverlap(booking);
 
@@ -274,6 +303,7 @@ namespace StudyRoomBooking.Controllers
 
                 return View(booking);
             }
+            
 
             _logger.LogInformation(
                 "Booking {BookingId} ble oppdatert.",
@@ -304,6 +334,11 @@ namespace StudyRoomBooking.Controllers
 
                 return NotFound();
             }
+                 if (!CanModify(booking))
+            {
+                _logger.LogWarning("{User} prøvde å slette booking {BookingId} uten tilgang.", User.Identity?.Name, id);
+                return Forbid();
+            }
 
             return View(booking);
         }
@@ -319,6 +354,19 @@ namespace StudyRoomBooking.Controllers
                 "Forsøker å slette booking {BookingId}.",
                 id);
 
+            var booking = await _bookingRepository.GetById(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            if (!CanModify(booking))
+            {
+                _logger.LogWarning("{User} prøvde å slette booking {BookingId} uten tilgang.", User.Identity?.Name, id);
+                return Forbid();
+            }
+            
+
             if (!await _bookingRepository.Delete(id))
             {
                 return Problem(
@@ -330,6 +378,13 @@ namespace StudyRoomBooking.Controllers
                 id);
 
             return RedirectToAction(nameof(Index));
+        }
+                // Only the owner of the booking or an admin can edit or delete it
+        private bool CanModify(Booking booking)
+        {
+            return User.IsInRole("Admin") ||
+                string.Equals(booking.StudentName, User.Identity?.Name,
+                    StringComparison.OrdinalIgnoreCase);
         }
 
         // Validate room and overlapping bookings
