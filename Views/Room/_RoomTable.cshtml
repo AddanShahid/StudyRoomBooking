@@ -84,6 +84,8 @@
                     </td>
 
                     <td>
+                         @if (User.IsInRole("Admin"))
+                        {
                         <a asp-controller="Room"
                            asp-action="Edit"
                            asp-route-id="@room.Id"
@@ -97,6 +99,7 @@
                            class="btn btn-sm btn-danger">
                             Slett
                         </a>
+                        }
                     </td>
                 </tr>
             }
