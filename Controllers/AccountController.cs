@@ -71,7 +71,7 @@ public class AccountController : Controller
         if (ModelState.IsValid)
         {
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
@@ -79,8 +79,14 @@ public class AccountController : Controller
                 return Redirect(targetUrl);
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-        }
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("[AccountController] Kontoen {Email} er låst etter for mange forsøk", model.Email);
+                ModelState.AddModelError(string.Empty, "Too many failed attempts. Try again in 5 minutes.");
+                return View(model);
+            }
+              ModelState.AddModelError(string.Empty,"Invalid login attempt.");
+        }  
 
         _logger.LogWarning("[AccountController] Mislykket innlogging for {Email}", model.Email);
         return View(model);
