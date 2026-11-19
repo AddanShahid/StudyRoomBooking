@@ -49,7 +49,8 @@ Vi leverer én zip med begge appene (uten `bin`, `obj`, `node_modules` og `dist`
 - ✅ Ingen overlappende bookinger i samme rom.
 - ✅ En booking kan vare maks 4 timer, innenfor åpningstid 08–22.
 - ✅ Man kan ikke booke tilbake i tid eller mer enn 60 dager frem.
-- ❌ Man kan ikke bli med i en booking når rommet er fullt (kapasitet).
+- ❌ Booking av samme rom kan ikke overlappe med en eksisterende booking.
+-  En booking kan ha deltakere, men det er ingen kapasitetsbegrensning på antall deltakere.
 - ❌ Samme student kan ikke bli med i samme booking to ganger.
 
 ---
@@ -62,7 +63,7 @@ Skriv navn bak hver rolle.
 - Equipment med N:M-relasjon mot Room, og Participation-modellen
 - Migrasjoner og seeding for de nye entitetene
 - Repositories for Equipment og Participation
-- Domeneregler for kapasitet og dobbel påmelding
+- Domeneregler for booking og dobbel påmelding
 - 12+ enhetstester (xUnit + Moq), 6 positive og 6 negative
 - **Dokumentasjon:** kap. 4 Database, testdelen av kap. 6
 
