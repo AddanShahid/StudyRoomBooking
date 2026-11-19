@@ -1,3 +1,4 @@
+
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
@@ -27,6 +28,17 @@
     <Compile Remove="SubApp2.Api/**/*.cs" />
     <Content Remove="SubApp2.Api/**" />
     <None Remove="SubApp2.Api/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+   
+    <Compile Remove="SubApp2.Api/**/*.cs" />
+    <Content Remove="SubApp2.Api/**" />
+    <None Remove="SubApp2.Api/**" />
+
+    <Compile Remove="StudyRoomBooking.Tests/**/*.cs" />
+    <Content Remove="StudyRoomBooking.Tests/**" />
+    <None Remove="StudyRoomBooking.Tests/**" />
   </ItemGroup>
 
 </Project>
