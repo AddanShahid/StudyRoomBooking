@@ -45,7 +45,7 @@ namespace StudyRoomBooking.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Equipment equipment)
+        public IActionResult Create([Bind("Name,Description")] Equipment equipment)
         {
             if (!ModelState.IsValid)
             {
@@ -77,7 +77,7 @@ namespace StudyRoomBooking.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Equipment equipment)
+        public IActionResult Edit(int id, [Bind("Id,Name,Description")] Equipment equipment)
         {
             if (id != equipment.Id)
                 return NotFound();
