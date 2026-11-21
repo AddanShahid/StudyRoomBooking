@@ -1,15 +1,28 @@
 
 import { useEffect, useState } from 'react'
 import './App.css'
-
-const API_URL = 'http://localhost:5095'
+import { loginUser } from './services/auth'
+import {
+  getAllParticipations,
+  joinBooking as joinParticipation,
+  leaveBooking as leaveParticipation,
+  updateParticipation as updateParticipationMessage
+} from './services/participations'
+import type { Participation } from './services/types'
+import { getRooms } from './services/rooms'
+import {
+  getBookings,
+  createBooking,
+  updateBooking,
+  deleteBooking as deleteBookingRequest
+} from './services/bookings'
 
 type Room = {
   id: number
   name: string
   location: string
   capacity: number
-  description?: string
+  description?: string | null
   hasWhiteboard: boolean
   hasScreen: boolean
 }
@@ -48,6 +61,9 @@ const emptyForm: BookingForm = {
 function App() {
   const [rooms, setRooms] = useState<Room[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [participations, setParticipations] = useState<Participation[]>([])
+  const [editingParticipationId, setEditingParticipationId] = useState<number | null>(null)
+  const [participationDraft, setParticipationDraft] = useState('')
   const [search, setSearch] = useState('')
   const [token, setToken] = useState('')
   const [email, setEmail] = useState('')
@@ -55,41 +71,22 @@ function App() {
   const [form, setForm] = useState<BookingForm>(emptyForm)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [formScrollRequest, setFormScrollRequest] = useState(0)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function apiRequest(path: string, options: RequestInit = {}) {
-    const response = await fetch(`${API_URL}${path}`, {
-      ...options,
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers
-      }
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Unauthorized. Please log in again.')
-      }
-      const detail = await response.text()
-      throw new Error(detail || `Request failed: ${response.status}`)
-    }
-
-    if (response.status === 204) return null
-    return response.json()
-  }
-
   async function loadData() {
     try {
       setError('')
-      const [roomData, bookingData] = await Promise.all([
-        apiRequest('/api/rooms'),
-        apiRequest('/api/bookings')
+      const [roomData, bookingData, participationData] = await Promise.all([
+        getRooms(),
+        getBookings(),
+        getAllParticipations()
       ])
       setRooms(roomData)
       setBookings(bookingData)
+      setParticipations(participationData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load data.')
     }
@@ -99,6 +96,15 @@ function App() {
     loadData()
   }, [])
 
+  useEffect(() => {
+    if (showForm && formScrollRequest > 0) {
+      document.getElementById('booking-form')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }, [showForm, formScrollRequest])
+
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
@@ -106,16 +112,8 @@ function App() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-
-      if (!response.ok) throw new Error('Invalid email or password.')
-
-      const data = await response.json()
-      setToken(data.token)
+      const userToken = await loginUser(email, password)
+      setToken(userToken)
       setPassword('')
       setMessage('Successfully logged in!')
     } catch (err) {
@@ -129,6 +127,7 @@ function App() {
     setForm({ ...emptyForm, roomId })
     setEditingId(null)
     setShowForm(true)
+    setFormScrollRequest(n => n + 1)
     setError('')
     setMessage('')
   }
@@ -145,6 +144,7 @@ function App() {
     })
     setEditingId(booking.id)
     setShowForm(true)
+    setFormScrollRequest(n => n + 1)
     setError('')
     setMessage('')
   }
@@ -179,13 +179,11 @@ function App() {
     try {
       const editing = editingId !== null
 
-      await apiRequest(
-        editing ? `/api/bookings/${editingId}` : '/api/bookings',
-        {
-          method: editing ? 'PUT' : 'POST',
-          body: JSON.stringify(payload)
-        }
-      )
+      if (editing && editingId !== null) {
+        await updateBooking(editingId, payload, token)
+      } else {
+        await createBooking(payload, token)
+      }
 
       setShowForm(false)
       setEditingId(null)
@@ -194,6 +192,80 @@ function App() {
       setMessage(editing ? 'Booking updated!' : 'Booking created!')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save booking.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function joinExistingBooking(bookingId: number) {
+    if (!token || !email.trim()) {
+      setError('Please log in first.')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      await joinParticipation(bookingId, email.trim(), '', token)
+      await loadData()
+      setMessage('Successfully joined the booking!')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not join booking.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function leaveExistingBooking(participationId: number) {
+    if (!token) {
+      setError('Please log in first.')
+      return
+    }
+
+    if (!window.confirm('Are you sure you want to leave this booking?')) {
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      await leaveParticipation(participationId, token)
+      await loadData()
+      setMessage('You have left the booking.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not leave booking.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function editParticipationMessage(participation: Participation) {
+    if (!token) {
+      setError('Please log in first.')
+      return
+    }
+
+    if (participationDraft.length > 500) {
+      setError('Message cannot exceed 500 characters.')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      await updateParticipationMessage(participation.id, participationDraft, token)
+      await loadData()
+      setEditingParticipationId(null)
+      setParticipationDraft('')
+      setMessage('Participation message updated!')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update message.')
     } finally {
       setLoading(false)
     }
@@ -214,7 +286,7 @@ function App() {
     setMessage('')
 
     try {
-      await apiRequest(`/api/bookings/${id}`, { method: 'DELETE' })
+      await deleteBookingRequest(id, token)
       await loadData()
       setMessage('Booking cancelled!')
     } catch (err) {
@@ -303,7 +375,7 @@ function App() {
       ))}
 
       {showForm && (
-        <section className="card">
+        <section className="card" id="booking-form">
           <h2>{editingId !== null ? 'Edit Booking' : 'Create Booking'}</h2>
 
           <form onSubmit={saveBooking}>
@@ -406,15 +478,88 @@ function App() {
       {bookings.length === 0 && <p>No bookings found.</p>}
 
       {bookings.map(booking => (
-        <div className="card" key={booking.id}>
+        <div className="card booking-card" key={booking.id}>
           <h3>{booking.subject}</h3>
+          <p>
+            Participants (including organizer): {1 + participations.filter(
+              p => p.bookingId === booking.id
+            ).length}
+          </p>
           <p>Student: {booking.studentName}</p>
           <p>Room: {rooms.find(r => r.id === booking.roomId)?.name || booking.roomId}</p>
           <p>Date: {booking.date.slice(0, 10)}</p>
           <p>Time: {booking.startTime} – {booking.endTime}</p>
           {booking.topic && <p>Topic: {booking.topic}</p>}
 
-          {token && (
+          {token &&
+            booking.studentName.toLowerCase() !== email.trim().toLowerCase() &&
+            !participations.some(p =>
+              p.bookingId === booking.id &&
+              p.studentName.toLowerCase() === email.trim().toLowerCase()
+            ) && (
+              <button
+                disabled={loading}
+                onClick={() => joinExistingBooking(booking.id)}
+              >
+                Join booking
+              </button>
+            )}
+
+          {token && participations
+            .filter(p =>
+              p.bookingId === booking.id &&
+              p.studentName.toLowerCase() === email.trim().toLowerCase()
+            )
+            .map(p => (
+              <div key={p.id}>
+                <p>Your message: {p.message || 'No message'}</p>
+                {editingParticipationId === p.id ? (
+                  <div>
+                    <textarea
+                      aria-label="Participation message"
+                      placeholder="Write your message..."
+                      maxLength={500}
+                      value={participationDraft}
+                      onChange={e => setParticipationDraft(e.target.value)}
+                    />
+                    <button
+                      disabled={loading}
+                      onClick={() => editParticipationMessage(p)}
+                    >
+                      Save message
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => {
+                        setEditingParticipationId(null)
+                        setParticipationDraft('')
+                      }}
+                    >
+                      Cancel edit
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    disabled={loading}
+                    onClick={() => {
+                      setEditingParticipationId(p.id)
+                      setParticipationDraft(p.message ?? '')
+                    }}
+                  >
+                    Edit message
+                  </button>
+                )}
+                <button
+                  disabled={loading}
+                  onClick={() => leaveExistingBooking(p.id)}
+                >
+                  Leave booking
+                </button>
+              </div>
+            ))}
+
+          {token &&
+            booking.studentName.trim().toLowerCase() === email.trim().toLowerCase() && (
             <>
               <button onClick={() => startEditing(booking)}>
                 Edit
