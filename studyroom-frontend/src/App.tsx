@@ -1,15 +1,21 @@
 
 import { useEffect, useState } from 'react'
 import './App.css'
-
-const API_URL = 'http://localhost:5095'
+import { loginUser } from './services/auth'
+import { getRooms } from './services/rooms'
+import {
+  getBookings,
+  createBooking,
+  updateBooking,
+  deleteBooking as deleteBookingRequest
+} from './services/bookings'
 
 type Room = {
   id: number
   name: string
   location: string
   capacity: number
-  description?: string
+  description?: string | null
   hasWhiteboard: boolean
   hasScreen: boolean
 }
@@ -59,34 +65,12 @@ function App() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function apiRequest(path: string, options: RequestInit = {}) {
-    const response = await fetch(`${API_URL}${path}`, {
-      ...options,
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers
-      }
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Unauthorized. Please log in again.')
-      }
-      const detail = await response.text()
-      throw new Error(detail || `Request failed: ${response.status}`)
-    }
-
-    if (response.status === 204) return null
-    return response.json()
-  }
-
   async function loadData() {
     try {
       setError('')
       const [roomData, bookingData] = await Promise.all([
-        apiRequest('/api/rooms'),
-        apiRequest('/api/bookings')
+        getRooms(),
+        getBookings()
       ])
       setRooms(roomData)
       setBookings(bookingData)
@@ -106,16 +90,8 @@ function App() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-
-      if (!response.ok) throw new Error('Invalid email or password.')
-
-      const data = await response.json()
-      setToken(data.token)
+      const userToken = await loginUser(email, password)
+      setToken(userToken)
       setPassword('')
       setMessage('Successfully logged in!')
     } catch (err) {
@@ -179,13 +155,11 @@ function App() {
     try {
       const editing = editingId !== null
 
-      await apiRequest(
-        editing ? `/api/bookings/${editingId}` : '/api/bookings',
-        {
-          method: editing ? 'PUT' : 'POST',
-          body: JSON.stringify(payload)
-        }
-      )
+      if (editing && editingId !== null) {
+        await updateBooking(editingId, payload, token)
+      } else {
+        await createBooking(payload, token)
+      }
 
       setShowForm(false)
       setEditingId(null)
@@ -214,7 +188,7 @@ function App() {
     setMessage('')
 
     try {
-      await apiRequest(`/api/bookings/${id}`, { method: 'DELETE' })
+      await deleteBookingRequest(id, token)
       await loadData()
       setMessage('Booking cancelled!')
     } catch (err) {
