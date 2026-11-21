@@ -49,3 +49,9 @@ export async function leaveBooking(
     token
   )
 }
+
+export async function getAllParticipations(): Promise<Participation[]> {
+  const data = await apiRequest<Participation[]>('/api/participations')
+  if (!data) throw new Error('Could not load participations.')
+  return data
+}
