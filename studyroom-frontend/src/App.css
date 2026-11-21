@@ -87,3 +87,32 @@ main > input {
 .card h3 {
     color: #843c78;
 }
+
+/* Spacing between booking action buttons */
+.booking-card button {
+  margin: 6px;
+}
+
+
+/* Participation message editor */
+.booking-card textarea {
+  display: block;
+  width: min(100%, 420px);
+  min-height: 100px;
+  margin: 16px auto 12px;
+  padding: 14px;
+  box-sizing: border-box;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #333333;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.booking-card textarea:focus {
+  outline: 2px solid #9f558f;
+  outline-offset: 2px;
+}

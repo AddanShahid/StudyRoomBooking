@@ -71,6 +71,7 @@ function App() {
   const [form, setForm] = useState<BookingForm>(emptyForm)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [formScrollRequest, setFormScrollRequest] = useState(0)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -95,6 +96,15 @@ function App() {
     loadData()
   }, [])
 
+  useEffect(() => {
+    if (showForm && formScrollRequest > 0) {
+      document.getElementById('booking-form')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }, [showForm, formScrollRequest])
+
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
@@ -117,6 +127,7 @@ function App() {
     setForm({ ...emptyForm, roomId })
     setEditingId(null)
     setShowForm(true)
+    setFormScrollRequest(n => n + 1)
     setError('')
     setMessage('')
   }
@@ -133,6 +144,7 @@ function App() {
     })
     setEditingId(booking.id)
     setShowForm(true)
+    setFormScrollRequest(n => n + 1)
     setError('')
     setMessage('')
   }
@@ -363,7 +375,7 @@ function App() {
       ))}
 
       {showForm && (
-        <section className="card">
+        <section className="card" id="booking-form">
           <h2>{editingId !== null ? 'Edit Booking' : 'Create Booking'}</h2>
 
           <form onSubmit={saveBooking}>
@@ -466,7 +478,7 @@ function App() {
       {bookings.length === 0 && <p>No bookings found.</p>}
 
       {bookings.map(booking => (
-        <div className="card" key={booking.id}>
+        <div className="card booking-card" key={booking.id}>
           <h3>{booking.subject}</h3>
           <p>
             Participants (including organizer): {1 + participations.filter(
