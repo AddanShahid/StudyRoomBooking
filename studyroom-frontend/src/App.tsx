@@ -1,4 +1,6 @@
-
+import AdminRooms from './AdminRooms'
+import ProtectedRoute from './ProtectedRoute'
+import { isAdminToken } from './services/roles'
 import { useEffect, useState } from 'react'
 import './App.css'
 import { loginUser } from './services/auth'
@@ -8,7 +10,7 @@ import {
   leaveBooking as leaveParticipation,
   updateParticipation as updateParticipationMessage
 } from './services/participations'
-import type { Participation } from './services/types'
+import type { Participation, Room } from './services/types'
 import { getRooms } from './services/rooms'
 import {
   getBookings,
@@ -16,16 +18,6 @@ import {
   updateBooking,
   deleteBooking as deleteBookingRequest
 } from './services/bookings'
-
-type Room = {
-  id: number
-  name: string
-  location: string
-  capacity: number
-  description?: string | null
-  hasWhiteboard: boolean
-  hasScreen: boolean
-}
 
 type Booking = {
   id: number
@@ -65,6 +57,12 @@ function App() {
   const [editingParticipationId, setEditingParticipationId] = useState<number | null>(null)
   const [participationDraft, setParticipationDraft] = useState('')
   const [search, setSearch] = useState('')
+  const [minCapacity, setMinCapacity] = useState('')
+  const [locationFilter, setLocationFilter] = useState('')
+  const [requireWhiteboard, setRequireWhiteboard] = useState(false)
+  const [requireScreen, setRequireScreen] = useState(false)
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [route, setRoute] = useState(() => window.location.hash === '#/admin' ? 'admin' : 'home')
   const [token, setToken] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -95,6 +93,19 @@ function App() {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    function handleHashChange() {
+      setRoute(window.location.hash === '#/admin' ? 'admin' : 'home')
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  async function refreshRooms() {
+    const latestRooms = await getRooms()
+    setRooms(latestRooms)
+  }
 
   useEffect(() => {
     if (showForm && formScrollRequest > 0) {
@@ -296,11 +307,16 @@ function App() {
     }
   }
 
-  const filteredRooms = rooms.filter(room =>
-    `${room.name} ${room.location}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  )
+  const locations = [...new Set(rooms.map(room => room.location.trim()).filter(Boolean))].sort()
+  const filteredRooms = rooms.filter(room => {
+    const matchesSearch = `${room.name} ${room.location} ${room.description ?? ''}`
+      .toLowerCase().includes(search.trim().toLowerCase())
+    const matchesCapacity = !minCapacity || room.capacity >= Number(minCapacity)
+    const matchesLocation = !locationFilter || room.location.trim() === locationFilter
+    const matchesWhiteboard = !requireWhiteboard || room.hasWhiteboard
+    const matchesScreen = !requireScreen || room.hasScreen
+    return matchesSearch && matchesCapacity && matchesLocation && matchesWhiteboard && matchesScreen
+  })
 
   return (
     <main>
@@ -310,7 +326,7 @@ function App() {
       {error && <p role="alert" style={{ color: 'crimson' }}>{error}</p>}
       {message && <p role="status">{message}</p>}
 
-      <section className="card">
+      <section className="card login-card">
         {token ? (
           <>
             <p>Logged in as {email}</p>
@@ -346,14 +362,62 @@ function App() {
         )}
       </section>
 
+      {route === 'admin' ? (
+        <>
+          <p><a href="#/">← Back to study rooms</a></p>
+          <ProtectedRoute token={token}>
+            <AdminRooms rooms={rooms} token={token} onRoomsChanged={refreshRooms} />
+          </ProtectedRoute>
+        </>
+      ) : (
+      <>
+      {isAdminToken(token) && (
+        <p className="admin-link"><a href="#/admin">Manage rooms (admin)</a></p>
+      )}
       <h2>Available study rooms</h2>
-
       <input
         type="search"
+        aria-label="Search study rooms by name, location or description"
         placeholder="Search for a study room..."
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
+      <div className="advanced-filter-wrap">
+        <button type="button" className="advanced-filters-toggle"
+          aria-expanded={showAdvancedFilters}
+          aria-controls="advanced-room-filters"
+          onClick={() => setShowAdvancedFilters(value => !value)}>
+          {showAdvancedFilters ? 'Hide filters' : 'More filters'}
+          {(minCapacity || locationFilter || requireWhiteboard || requireScreen) ? ' • Active' : ''}
+        </button>
+      </div>
+      {showAdvancedFilters && (
+        <section id="advanced-room-filters" className="room-filters" aria-label="Filter study rooms">
+          <label htmlFor="min-capacity">Minimum capacity
+            <input id="min-capacity" type="number" min={1} max={50} step={1}
+              value={minCapacity} onChange={e => setMinCapacity(e.target.value)} />
+          </label>
+          <label htmlFor="room-location-filter">Location
+            <select id="room-location-filter" value={locationFilter}
+              onChange={e => setLocationFilter(e.target.value)}>
+              <option value="">All locations</option>
+              {locations.map(location => <option key={location} value={location}>{location}</option>)}
+            </select>
+          </label>
+          <label className="check-label">
+            <input type="checkbox" checked={requireWhiteboard}
+              onChange={e => setRequireWhiteboard(e.target.checked)} /> Whiteboard
+          </label>
+          <label className="check-label">
+            <input type="checkbox" checked={requireScreen}
+              onChange={e => setRequireScreen(e.target.checked)} /> Screen
+          </label>
+          <button type="button" onClick={() => {
+            setSearch(''); setMinCapacity(''); setLocationFilter('')
+            setRequireWhiteboard(false); setRequireScreen(false)
+          }}>Clear filters</button>
+        </section>
+      )}
 
       {filteredRooms.length === 0 && <p>No rooms found.</p>}
 
@@ -574,6 +638,8 @@ function App() {
           )}
         </div>
       ))}
+      </>
+      )}
     </main>
   )
 }

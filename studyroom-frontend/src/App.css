@@ -116,3 +116,41 @@ main > input {
   outline: 2px solid #9f558f;
   outline-offset: 2px;
 }
+
+/* React client: shared filter controls and admin interface */
+.page-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 24px auto; }
+.page-nav a { display: inline-block; padding: 10px 15px; border: 1px solid #bfa1b6; border-radius: 8px; text-decoration: none; }
+.page-nav a:hover, .page-nav a:focus-visible { background: #f1e6ef; }
+.room-filters { display: flex; flex-wrap: wrap; align-items: end; justify-content: center; gap: 14px; max-width: 860px; margin: 24px auto; }
+.room-filters label { display: flex; flex-direction: column; align-items: start; gap: 6px; font-size: 14px; }
+.room-filters input:not([type="checkbox"]), .room-filters select { padding: 10px; border: 1px solid #ccc; border-radius: 7px; font: inherit; max-width: 100%; }
+.room-filters .check-label { flex-direction: row; align-items: center; }
+.card input[type="checkbox"] { width: auto; padding: 0; }
+.admin-panel { max-width: 760px; }
+.admin-form { text-align: left; }
+.admin-form textarea { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 7px; font: inherit; }
+.admin-form label { display: block; }
+.admin-form .check-label { display: flex; align-items: center; gap: 10px; }
+.room-time-fields { display: flex; flex-wrap: wrap; gap: 20px; }
+.room-time-fields label { flex: 1 1 180px; }
+.room-time-fields input { display: block; margin-top: 6px; }
+.form-error { color: #a31335; }
+.form-success { color: #24663c; }
+.admin-room-list { padding: 0; list-style: none; text-align: left; }
+.admin-room-list li { padding: 12px 0; border-top: 1px solid #e8dce5; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.admin-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+@media (max-width: 600px) { #root { padding: 18px 12px; } .card { padding: 16px; } .room-filters { align-items: stretch; flex-direction: column; } }
+
+/* Original, compact study room layout; features stay available. */
+.login-card { max-width: 350px; }
+.advanced-filter-wrap { margin-top: 10px; }
+#root .advanced-filters-toggle {
+  background: transparent;
+  color: #9f558f;
+  border: 1px solid #d9bed2;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+#root .advanced-filters-toggle:hover { background: #f5eaf3; }
+.room-filters { max-width: 640px; padding: 15px; border: 1px solid #eadfe8; border-radius: 10px; background: #fff; }
+.admin-link { margin: 20px 0; }
