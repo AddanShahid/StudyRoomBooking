@@ -14,25 +14,27 @@ Vi leverer én zip med begge appene (uten `bin`, `obj`, `node_modules` og `dist`
 
 ---
 
-## Status (27.10)
+## Status (27.11)
+
 
 | Krav | Subapp 1 (MVC) | Subapp 2 (API + React) |
 |---|---|---|
-| CRUD på minst 1 entitet | ✅ Booking | ❌ |
-| 3 domene-entiteter med CRUD | ⚠️ 1 av 3 (Room mangler sider, én entitet til mangler) | ❌ |
-| N:M-relasjon | ❌ | ❌ |
-| Kompleks domeneregel på serveren | ✅ Ingen dobbeltbooking | ❌ |
-| Repository + DAL, async/await | ✅ | ❌ |
-| Validering på klient og server | ✅ | ❌ |
-| Feilhåndtering og logging (ILogger) | ✅ | ❌ |
-| ViewModels / DTOs | ❌ | ❌ |
-| Søk og filtrering på flere parametere | ❌ | ❌ |
-| 2 typer conditional rendering | ⚠️ 1 av 2 | ❌ |
-| Autentisering og autorisasjon | ❌ | ❌ |
-| 12 enhetstester (6 positive, 6 negative) | ❌ | – |
-| API-servicelag på klienten | – | ❌ |
-| Design og UX | ⚠️ Grunnleggende | ❌ |
-| Dokumentasjon | ❌ | |
+| CRUD på minst 1 entitet | ✅ Booking | ✅ Booking |
+| 3 domene-entiteter med CRUD | ✅ Room, Booking, Equipment | ✅ Room, Booking, Participation |
+| N:M-relasjon | ✅ Room–Equipment | ✅ Delt datamodell |
+| Kompleks domeneregel | ✅ Ingen dobbeltbooking | ✅ Dobbeltbooking, dobbel påmelding og kapasitet |
+| Repository + DAL, async/await | ⚠️ Equipment bruker DbContext direkte | ✅ Gjenbruker DAL |
+| Validering på klient og server | ✅ | ✅ |
+| Feilhåndtering og logging | ✅ | ✅ |
+| ViewModels / DTOs | ✅ ViewModels | ✅ DTOs |
+| Søk og filtrering | ✅ Booking og Room | ✅ API og React |
+| Conditional rendering | ✅ | ✅ |
+| Autentisering og autorisasjon | ✅ Identity og roller | ✅ JWT og roller |
+| Enhetstester | ✅ 15 skrevet, resultater ikke verifisert | – |
+| API-servicelag | – | ✅ services/ |
+| Design og UX | ✅ | ✅ |
+| Dokumentasjon | ⚠️ Pågår | ⚠️ Pågår |
+
 
 ---
 
@@ -40,19 +42,17 @@ Vi leverer én zip med begge appene (uten `bin`, `obj`, `node_modules` og `dist`
 
 | Entitet | Relasjon | Innhold | Status |
 |---|---|---|---|
-| **Room** | 1:N Booking, N:M Equipment | Navn, lokasjon, kapasitet, beskrivelse | ✅ Modell, ❌ sider |
+| **Room** | 1:N Booking, N:M Equipment | Navn, lokasjon, kapasitet, beskrivelse | ✅ |
 | **Booking** | N:1 Room, 1:N Participation | Student, emne, tema, dato, start, slutt | ✅ |
-| **Equipment** | N:M Room | Prosjektor, whiteboard, skjerm (dekker N:M-kravet) | ❌ |
-| **Participation** | N:1 Booking | Student som blir med i en booking, med en melding | ❌ |
+| **Equipment** | N:M Room | Prosjektor, whiteboard, skjerm (dekker N:M-kravet) | ✅ |
+| **Participation** | N:1 Booking | Student som blir med i en booking, med en melding | ✅ |
 
 **Domeneregler på serveren:**
 - ✅ Ingen overlappende bookinger i samme rom.
 - ✅ En booking kan vare maks 4 timer, innenfor åpningstid 08–22.
 - ✅ Man kan ikke booke tilbake i tid eller mer enn 60 dager frem.
-- ❌ Booking av samme rom kan ikke overlappe med en eksisterende booking.
--  En booking kan ha deltakere, men det er ingen kapasitetsbegrensning på antall deltakere.
-- ❌ Samme student kan ikke bli med i samme booking to ganger.
-
+- ✅ Antall deltakere kan ikke overstige rommets kapasitet (sjekkes i API-et).
+- ✅ Samme student kan ikke bli med i samme booking to ganger.
 ---
 
 ## Roller
@@ -92,7 +92,7 @@ Skriv navn bak hver rolle.
 - **Dokumentasjon:** kap. 3 Arkitektur og ADR-er
 
 ### Medlem E: React-klient (navn: ______)
-- Opprette `SubApp2.Client` (Vite + React + TypeScript)
+- Opprette `studyroom-frontend` (Vite + React + TypeScript)
 - API-servicelag (egne `services/`-filer)
 - Komponenter og sider for CRUD, søk og filtrering
 - Conditional rendering, skjemaer med validering, feilmeldinger
@@ -228,3 +228,48 @@ dotnet run
 ```
 
 Databasen (SQLite) lages og fylles med eksempeldata automatisk første gang appen starter.
+
+---
+
+## Kjøre prosjektet (Subapp 2)
+
+
+Start Subapp 1 én gang først for å opprette og fylle SQLite-databasen.
+
+### Starte Web API
+
+Åpne terminalen i prosjektets hovedmappe og kjør:
+
+```bash
+cd SubApp2.Api
+dotnet user-secrets set "Jwt:Key" "$(openssl rand -hex 32)"
+dotnet run
+```
+
+API-et kjører på http://localhost:5095.
+
+JWT-nøkkelen opprettes lokalt med `user-secrets` og skal ikke legges i GitHub. Kommandoen for å opprette nøkkelen trenger bare å kjøres én gang.
+
+
+
+### Starte React-klienten
+
+Åpne en ny terminal i prosjektets hovedmappe og kjør:
+
+```bash
+cd studyroom-frontend
+npm install
+npm run dev
+```
+
+React kjører på http://localhost:5173.
+
+### Testbrukere
+
+| Rolle | E-post | Passord |
+|---|---|---|
+| Admin | admin@oslomet.no | Admin123! |
+| Student | student@oslomet.no | Student123! |
+
+Begge applikasjonene bruker samme SQLite-database.
+Start MVC-applikasjonen først for å opprette databasen, deretter API-et og React-klienten.
