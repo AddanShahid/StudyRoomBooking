@@ -291,5 +291,36 @@ public async Task Update_ReturnsFalseWhenParticipationDoesNotExist()
 
     Assert.False(result);
 }
+
+
+[Fact]
+public async Task GetAll_ReturnsNullWhenContextIsDisposed()
+{
+    var context = CreateContext();
+
+    var repository = new ParticipationRepository(
+        context, CreateLogger().Object);
+
+    context.Dispose();
+
+    var result = await repository.GetAll();
+
+    Assert.Null(result);
+}
+
+[Fact]
+public async Task GetById_ReturnsNullWhenContextIsDisposed()
+{
+    var context = CreateContext();
+
+    var repository = new ParticipationRepository(
+        context, CreateLogger().Object);
+
+    context.Dispose();
+
+    var result = await repository.GetById(1);
+
+    Assert.Null(result);
+}
     }
 }
