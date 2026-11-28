@@ -242,14 +242,12 @@ Start Subapp 1 én gang først for å opprette og fylle SQLite-databasen.
 
 ```bash
 cd SubApp2.Api
-dotnet user-secrets set "Jwt:Key" "$(openssl rand -hex 32)"
-dotnet run
+dotnet run --launch-profile http
 ```
 
 API-et kjører på http://localhost:5095.
 
-JWT-nøkkelen opprettes lokalt med `user-secrets` og skal ikke legges i GitHub. Kommandoen for å opprette nøkkelen trenger bare å kjøres én gang.
-
+JWT-nøkkelen er allerede satt opp for lokal utvikling, så det er ikke nødvendig å konfigurere den selv.
 
 
 ### Starte React-klienten
