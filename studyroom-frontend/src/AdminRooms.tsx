@@ -95,7 +95,7 @@ export default function AdminRooms({ rooms, token, onRoomsChanged }: AdminRoomsP
       closingTime: roomForm.closingTime
     }
 
-    if (!/^[\p{L}0-9 .\-]+$/u.test(payload.name) || payload.name.length < 2 || payload.name.length > 50) {
+    if (!/^[\p{L}0-9 .-]+$/u.test(payload.name) || payload.name.length < 2 || payload.name.length > 50) {
       setError('Room name must contain 2–50 letters, numbers, spaces, periods or hyphens.')
       return
     }
